@@ -29,6 +29,7 @@ class MyGame(arcade.Window):
         # Variables that will hold sprite lists
         self.player_list = None
         self.wall_list = None
+        self.texture_list = None
         self.enemy_list = None
 
         # Set up the player info
@@ -41,6 +42,7 @@ class MyGame(arcade.Window):
         self.down_pressed = False
 
         self.physics_engine = None
+        self.physics_engine2 = None
 
         # --- Related to paths
         # List of points that makes up a path between two points
@@ -61,7 +63,8 @@ class MyGame(arcade.Window):
         # Sprite lists
         self.player_list = arcade.SpriteList()
 
-        self.wall_list = create_scene.create_all(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.wall_list = create_scene.create_wall(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.texture_list = create_scene.create_texture()
         """
             self.enemy_list = arcade.SpriteList()
             """
@@ -74,6 +77,8 @@ class MyGame(arcade.Window):
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player,
                                                          self.wall_list)
+        self.physics_engine2 = arcade.PhysicsEngineSimple(self.player,
+                                                         self.texture_list)
         """
         # --- Path related
         # This variable holds the travel-path. We keep it as an attribute so
@@ -130,6 +135,7 @@ class MyGame(arcade.Window):
 
             # Update the character
             self.physics_engine.update()
+            self.physics_engine2.update()
 
             """
                 # Calculate a path to the player
@@ -153,8 +159,10 @@ class MyGame(arcade.Window):
             arcade.start_render()
 
             # Draw all the sprites.
-            self.player_list.draw()
+            
             self.wall_list.draw()
+            self.texture_list.draw()
+            self.player_list.draw()
 
             # self.enemy_list.draw()
 

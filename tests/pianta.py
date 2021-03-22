@@ -45,18 +45,6 @@ class Game(arcade.Window):
         arcade.draw_lines(point_list, arcade.color.BLACK, 5)
 
         # Texture
-        texture = arcade.load_texture(
-            ":resources:images/space_shooter/playerShip1_orange.png")
-        scale = .5
-        arcade.draw_scaled_texture_rectangle(150, 150, texture, scale, 0)
-
-        stairs = arcade.load_texture(
-            "Bitmap/stairs.png")
-        arcade.draw_scaled_texture_rectangle(742.5, 475, stairs, .95, 90)
-        lift = arcade.load_texture(
-            "Bitmap/lift.png")
-        arcade.draw_scaled_texture_rectangle(300, 55, lift, 0.95, 0)
-
         # Finish drawing
         arcade.finish_render()
 
