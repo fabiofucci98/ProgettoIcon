@@ -1,49 +1,24 @@
 class Graph:
     def __init__(self, barrier_list):
-        def collides():
-            pass
-        self.nodes = []
-        self.edges = []
-        for x in range(0, 800, 50):
-            for y in range(0, 800, 50):
-                self.nodes.append(Node((x, y)))
-        for node1 in self.nodes:
-            for node2 in self.nodes:
-                if node1 != node2:
-                    self.edges.append(Edge(node1, node2))
+        self.mat = []
+        barr_pos = [(barr.center_x, barr.center_y) for barr in barrier_list]
+        for x in range(8, 800, 16):
+            row = []
+            for y in range(8, 800, 16):
+                node = 1 if (x, y) in barr_pos else 0
+                row.append(node)
+            self.mat.append(row)
 
-    def add_node(self, node):
-        self.nodes.append(node)
-
-    def add_edge(self, edge):
-        self.edges.append(edge)
-
-
-class Node:
-    def __init__(self, value=None):
-        self.value = value
-
-    def __eq__(self, other):
-        return self.value == other.value if type(other) == Node else False
-
-    def __repr__(self):
-        return str(self.value)
-
-    def __str__(self):
-        return str(self.value)
-
-
-class Edge:
-    def __init__(self, n1, n2, cost=0):
-        self.n1 = n1
-        self.n2 = n2
-        self.cost = cost
-
-    def __eq__(self, other):
-        return self.n1 == other.n1 and self.n2 == other.n2 and self.cost == other.cost
-
-    def __repr__(self):
-        return str(self.n1)+' '+str(self.n2)+str(self.cost)
-
-    def __str__(self):
-        return str(self.n1)+' '+str(self.n2)+str(self.cost)
+    def get_neighbours(self, pos):
+        offsets = (-1, -1), (-1, 0), (-1, 1), (0,
+                                               -1),  (0, 1), (1, -1), (1, 0), (1, 1)
+        neighbours = []
+        for offset in offsets:
+            x = int(pos[0]/16)+offset[0]
+            y = int(pos[1]/16)+offset[1]
+            try:
+                if self.mat[x][y] == 0:
+                    neighbours.append((x*16, y*16))
+            except IndexError:
+                pass
+        return neighbours
