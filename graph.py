@@ -1,3 +1,5 @@
+#Commento per issue di test
+
 class Graph:
     def __init__(self, barrier_list):
         self.mat = []
