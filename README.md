@@ -11,11 +11,11 @@ Bug Muro:
   3 Il robottino si blocca per qualche secondo per poi raggiungere l'utlimo punto bianco cliccato
   
   
-  Creato issue 
-  creato branch (git branch 'nome branch') 
-  mi sposto sul branch (git checkout 'nome branch')   
-  lavoro sul branch 
-  git add file1 file2 ... filen 
-  git commit -m "commento" 
-  git push origin 'nome branch'
+  Creato issue  
+  creato branch (git branch 'nome branch')  
+  mi sposto sul branch (git checkout 'nome branch')    
+  lavoro sul branch  
+  git add file1 file2 ... filen  
+  git commit -m "commento"  
+  git push origin 'nome branch' 
   
