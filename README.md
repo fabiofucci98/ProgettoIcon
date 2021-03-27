@@ -19,3 +19,6 @@ Bug Muro:
   git commit -m "commento"  
   git push origin 'nome branch' 
   
+  Per fare review: 
+  git fetch origin  
+  git checkout -b issue#[numero issue] origin/issue#[numero issue]  
