@@ -8,7 +8,8 @@ def create_collidable(screen_width, screen_height):
         use_spatial_hash=True, spatial_hash_cell_size=128)
 
     walls.extend(create_outer_walls(screen_width, screen_height))
-    
+    walls.extend(create_boiler())
+    walls.extend(create_generator())
     return walls
 
 
@@ -17,6 +18,7 @@ def create_not_collidable():
 
     texture.extend(create_stair())
     texture.extend(create_lift())
+    
 
     return texture
 
@@ -102,4 +104,20 @@ def create_lift():
 
     return texture_list
 
-#CULO
+def create_boiler():
+    texture_list = arcade.SpriteList(is_static=True)
+    texture = arcade.Sprite(
+        "resources/ObjSprite/caldaia.png",1)
+    texture.center_x = 736
+    texture.center_y = 88
+    texture_list.append(texture)
+    return texture_list
+
+def create_generator():
+    texture_list = arcade.SpriteList(is_static=True)
+    texture = arcade.Sprite(
+        "resources/ObjSprite/generatore2.png",2)
+    texture.center_x = 64
+    texture.center_y = 668
+    texture_list.append(texture)
+    return texture_list

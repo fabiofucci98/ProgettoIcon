@@ -7,10 +7,12 @@ from path_finding import A_star
 
 
 SPRITE_SIZE = 32
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 800
+SCREEN_WIDTH_ROOM = 800
 
 SCREEN_TITLE = "Culo"
+
 
 
 class MyGame(arcade.Window):
@@ -36,7 +38,7 @@ class MyGame(arcade.Window):
         self.check = 1
         self.player_list = arcade.SpriteList()
         self.wall_list = create_scene_ground_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
+            SCREEN_WIDTH_ROOM, SCREEN_HEIGHT)
         self.texture_list = create_scene_ground_floor.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
@@ -52,7 +54,7 @@ class MyGame(arcade.Window):
         self.check = 2
         self.player_list = arcade.SpriteList()
         self.wall_list = create_scene_up_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
+           SCREEN_WIDTH_ROOM, SCREEN_HEIGHT)
         self.texture_list = create_scene_up_floor.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
@@ -69,7 +71,7 @@ class MyGame(arcade.Window):
         self.check = 3
         self.player_list = arcade.SpriteList()
         self.wall_list = create_scene_down_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
+            SCREEN_WIDTH_ROOM, SCREEN_HEIGHT)
         self.texture_list = create_scene_down_floor.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
@@ -105,13 +107,16 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.texture_list.draw()
         self.player_list.draw()
+        
 
     def on_mouse_press(self, x, y, button, modifiers):
-        x, y = x-x % 16, y-y % 16
-        robot_pos = self.player.position
-        self.path = A_star(self.graph, [robot_pos], (x, y))
-        print(x,y)
-        self.timer_scene = 2
+        if x < 800 :
+            x, y = x-x % 16, y-y % 16
+            robot_pos = self.player.position
+            self.path = A_star(self.graph, [robot_pos], (x, y))
+            print(x,y)
+            self.timer_scene = 2
+        
         
     
     def cambia(self):
@@ -122,9 +127,8 @@ class MyGame(arcade.Window):
             self.clear()
             self.setup_ground_floor()
             
-            
-        
-        
+              
+    
     
 def main():
     """ Main method """

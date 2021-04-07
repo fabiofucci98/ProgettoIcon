@@ -11,6 +11,7 @@ def create_collidable(screen_width, screen_height):
     walls.extend(create_serra())
     walls.extend(create_bedroom())
     walls.extend(create_double_room())
+    walls.extend(create_plants())
 
     return walls
 
@@ -21,6 +22,7 @@ def create_not_collidable():
     texture.extend(create_lift())
 
     return texture
+
 
 def create_outer_walls(screen_width, screen_height):
     print("up floor")
@@ -215,3 +217,30 @@ def create_lift():
     
 
     return texture_list
+
+def create_plants():
+    texture_list = arcade.SpriteList(is_static=True)
+    for i in range(0,10):
+        texture = arcade.Sprite(
+            "resources/ObjSprite/pianta1.png",1)
+        x = 80*i+40
+        texture.center_x = x
+        texture.center_y = 752
+        texture_list.append(texture)
+    for i in range(0,10):
+        texture = arcade.Sprite(
+            "resources/ObjSprite/pianta3.png",1)
+        x = 80*i+40
+        texture.center_x = x
+        texture.center_y = 688
+        texture_list.append(texture)
+    for i in range(0,10):
+        texture = arcade.Sprite(
+            "resources/ObjSprite/pianta2.png",1)
+        x = 80*i+40
+        texture.center_x = x
+        texture.center_y = 624
+        texture_list.append(texture)
+
+    return texture_list
+
