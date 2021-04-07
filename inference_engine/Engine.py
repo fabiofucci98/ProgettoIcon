@@ -18,53 +18,58 @@ class Clause:
 
 
 class Predicate:
-    def __init__(self, predicate, arguments=[]):
-        self.predicate = predicate
-        self.arguments = arguments
+    def __init__(self, pred, args=[]):
+        self.pred = pred
+        self.args = args
+        self.negated = True if len(
+            self.pred) > 4 and self.pred[0:4] == 'not_' else False
 
     def __str__(self):
-        return str(self.predicate)+str(self.arguments)
+        return str(self.pred)+str(self.args)
 
     def __repr__(self):
-        return str(self.predicate)+str(self.arguments)
+        return str(self.pred)+str(self.args)
 
     def __eq__(self, o: object):
-        return isinstance(o, Predicate) and self.predicate == o.predicate and self.arguments == o.arguments
+        return isinstance(o, Predicate) and self.pred == o.pred and self.args == o.args
+
+    def negate(self):
+        return Predicate(self.pred[4:], self.args) if self.negated else Predicate('not_' + self.pred, self.args)
 
 
 class Variable:
-    def __init__(self, variable):
-        self.variable = variable
-        self.n_renamed = 0
+    def __init__(self, var):
+        self.var = var
+        self.count = 0
 
     def inc(self):
-        self.n_renamed += 1
+        self.count += 1
 
     def reset(self):
-        self.n_renamed = 0
+        self.count = 0
 
     def __str__(self):
-        return str(self.variable)+str(self.n_renamed)
+        return str(self.var)+str(self.count)
 
     def __repr__(self):
-        return str(self.variable)+str(self.n_renamed)
+        return str(self.var)+str(self.count)
 
     def __eq__(self, o: object):
-        return isinstance(o, Variable) and self.variable == o.variable
+        return isinstance(o, Variable) and self.var == o.var and self.count == o.count
 
 
 class Constant:
-    def __init__(self, constant):
-        self.constant = constant
+    def __init__(self, const):
+        self.const = const
 
     def __str__(self):
-        return str(self.constant)
+        return str(self.const)
 
     def __repr__(self):
-        return str(self.constant)
+        return str(self.const)
 
     def __eq__(self, o: object):
-        return isinstance(o, Constant) and self.constant == o.constant
+        return isinstance(o, Constant) and self.const == o.const
 
 
 class Engine(object):
@@ -91,173 +96,152 @@ class Engine(object):
             return
 
         for line in f:
-            preds = findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', line)
-            preds = [self.parse_pred(pred) for pred in preds]
-            self.kb.append(Clause(preds[0], preds[1:]))
+            preds = self.parse_query(line)
+            if preds:
+                self.kb.append(Clause(preds[0], preds[1:]))
+
     """
     Restituisce tutti i predicati contenuti nella stringa query
     """
 
     def parse_query(self, query):
-        return [self.parse_pred(pred) for pred in findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', query)]
-
-    """
-    Restituisce il predicato contenuto nella stringa query
-    """
-
-    def parse_pred(self, pred):
-        l = findall('[a-zA-Z0-9_]+', pred)
-        for i in range(1, len(l)):
-            l[i] = Variable(
-                l[i]) if l[i][0].isupper() else Constant(l[i])
-        pred = Predicate(l[0], l[1:])
-        return pred
-
-    """
-    Effettua una query, prende in input una lista di predicati, 
-    restituisce una versione "pulita" delle derivazioni SLD generate con Engine.get_SLD_derivations
-    """
-
-    def ask(self, query: list):
-        """
-        Pulisce le derivazioni SLD in input, restituisce una stringa rappresentante la lista di tuple di individui per i quali la  
-        risoluzione ha avuto successo se ce ne sono, "True" se non ce ne sono ma la risoluzione ha avuto successo, "False" altrimenti
-        """
-        def clean(SLD_derivations):
-            if not SLD_derivations:
-                return 'False'
-
-            tmp_answers = [der[-1].head.arguments for der in SLD_derivations]
-            answers = []
-            for answer in tmp_answers:
-                if answer not in answers:
-                    answers.append(answer)
-
-            out = ''
-            for answer in answers:
-                for i, individual in enumerate(answer):
-                    out += str(individual)
-                    if i < len(answer)-1:
-                        out += ', '
-                out += '\n'
-            if out == '\n':
-                return 'True'
-            return out
-
-        return clean(self.get_SLD_derivations(query))
+        def parse_pred(pred):
+            l = findall('[a-zA-Z0-9_]+', pred)
+            for i in range(1, len(l)):
+                l[i] = Variable(
+                    l[i]) if l[i][0].isupper() else Constant(l[i])
+            pred = Predicate(l[0], l[1:])
+            return pred
+        return [parse_pred(pred) for pred in findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', query)]
 
     """
     Genera le derivazioni SLD ottenute a partire da query, vedere libro per documentazione dettagliata
     """
 
-    def get_SLD_derivations(self, query: list):
+    def prove(self, query: list, prove_one=False):
 
-        def substitute(clause, substitution):
-            to_substitute = [sub[0] for sub in substitution]
-            clause = deepcopy(clause)
-            for i in range(len(clause.head.arguments)):
-                if clause.head.arguments[i] in to_substitute:
-                    clause.head.arguments[i] = substitution[to_substitute.index(
-                        clause.head.arguments[i])][1]
+        def substitute(clause, subs):
+            to_substitute = [sub[0] for sub in subs]
+            # clause = deepcopy(clause)
+            for i in range(len(clause.head.args)):
+                if clause.head.args[i] in to_substitute:
+                    clause.head.args[i] = subs[to_substitute.index(
+                        clause.head.args[i])][1]
 
             for pred in clause.body:
-                for j in range(len(pred.arguments)):
-                    if pred.arguments[j] in to_substitute:
-                        pred.arguments[j] = substitution[to_substitute.index(
-                            pred.arguments[j])][1]
+                for j in range(len(pred.args)):
+                    if pred.args[j] in to_substitute:
+                        pred.args[j] = subs[to_substitute.index(
+                            pred.args[j])][1]
             return clause
 
         def unify(t1, t2):
-            def replace(a, b, equalities, substitutions):
-                for i in range(len(equalities)):
-                    for j in range(len(equalities[i])):
-                        if equalities[i][j] == a:
-                            equalities[i][j] = b
-                for i in range(len(substitutions)):
-                    for j in range(len(substitutions[i])):
-                        if substitutions[i][j] == a:
-                            substitutions[i][j] = b
-            equalities = [[t1, t2]]
-            substitutions = []
-            while len(equalities) != 0:
-                a, b = equalities[0]
-                del equalities[0]
+            def replace(a, b, eqs, subs):
+                for i in range(len(eqs)):
+                    for j in range(len(eqs[i])):
+                        if eqs[i][j] == a:
+                            eqs[i][j] = b
+                for i in range(len(subs)):
+                    for j in range(len(subs[i])):
+                        if subs[i][j] == a:
+                            subs[i][j] = b
+            eqs = [[t1, t2]]
+            subs = []
+            while len(eqs) != 0:
+                a, b = eqs[0]
+                del eqs[0]
                 if a != b:
                     if isinstance(a, Variable):
-                        replace(a, b, equalities, substitutions)
-                        substitutions.append([a, b])
+                        replace(a, b, eqs, subs)
+                        subs.append([a, b])
                     elif isinstance(b, Variable):
-                        replace(b, a, equalities, substitutions)
-                        substitutions.append(([b, a]))
-                    elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.arguments) == len(b.arguments) and a.predicate == b.predicate and len(a.arguments) > 0:
-                        for ai, bi in zip(a.arguments, b.arguments):
-                            equalities.append([ai, bi])
+                        replace(b, a, eqs, subs)
+                        subs.append(([b, a]))
+                    elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.args) == len(b.args) and a.pred == b.pred and len(a.args) > 0:
+                        for ai, bi in zip(a.args, b.args):
+                            eqs.append([ai, bi])
                     else:
                         return None
-            return substitutions
+            return subs
 
-        def rename_variables(clause):
-            tmp_clause = deepcopy(clause)
-            for term in tmp_clause.head.arguments:
+        def rename_vars(clause):
+            for term in clause.head.args:
                 if isinstance(term, Variable):
                     term.inc()
-            for pred in tmp_clause.body:
-                for term in pred.arguments:
+            for pred in clause.body:
+                for term in pred.args:
                     if isinstance(term, Variable):
                         term.inc()
-            return tmp_clause
+            return clause
 
-        def find_neighbours(gac):
+        def derive(gac):
+            def contains_vars(pred):
+                for arg in pred.args:
+                    if isinstance(arg, Variable):
+                        return True
+                return False
+
             neighbours = []
             for atom in gac.body:
-                for clause in self.kb:
-                    if clause.head == atom:
-                        idx = gac.body.index(atom)
-                        tmp_gac = deepcopy(gac)
-                        del tmp_gac.body[idx]
-                        tmp_gac.body[idx:idx] = clause.body
-                        neighbours.append(tmp_gac)
-                    renamed_clause = rename_variables(clause)
-                    sub = unify(renamed_clause.head, atom)
-                    if sub:
-                        idx = gac.body.index(atom)
-                        tmp_gac = deepcopy(gac)
-                        del tmp_gac.body[idx]
-                        tmp_gac.body[idx:idx] = renamed_clause.body
-                        neighbours.append(substitute(tmp_gac, sub))
+                idx = gac.body.index(atom)
+                if not atom.negated:
+                    for clause in self.kb:
+                        renamed_clause = rename_vars(deepcopy(clause))
+                        sub = unify(renamed_clause.head, atom)
+                        if isinstance(sub, list):
+                            tmp_gac = deepcopy(gac)
+                            del tmp_gac.body[idx]
+                            tmp_gac.body[idx:idx] = renamed_clause.body
+                            neighbours.append(substitute(tmp_gac, sub))
+                elif not contains_vars(atom):
+                    if not self.prove([atom.negate()]):
+                        neighbour = deepcopy(gac)
+                        del neighbour.body[idx]
+                        neighbours.append(neighbour)
+                    else:
+                        return []
+                else:
+                    continue
+
             return neighbours
 
-        def reset_variables():
-
+        def reset_vars():
             for clause in self.kb:
-                for term in clause.head.arguments:
+                for term in clause.head.args:
                     if isinstance(term, Variable):
                         term.reset()
                 for pred in clause.body:
-                    for term in pred.arguments:
+                    for term in pred.args:
                         if isinstance(term, Variable):
                             term.reset()
 
         gac = Clause(Predicate('yes', []), query)
         for pred in query:
-            for term in pred.arguments:
+            for term in pred.args:
                 if isinstance(term, Variable):
-                    gac.head.arguments.append(term)
-        gacs = []
+                    gac.head.args.append(term)
+
+        SLD_derivations = []
         frontier = [[gac]]
         while len(frontier) != 0:
             path = frontier[-1]
             del frontier[-1]
             if len(path[-1].body) == 0:
-                if path not in gacs:
-                    gacs.append(path)
-            for edge in find_neighbours(path[-1]):
+                if path not in SLD_derivations:
+                    if prove_one:
+                        return True
+                    SLD_derivations.append(path)
+                    continue
+            neighbours = derive(path[-1])
+            for edge in neighbours:
+                if edge in path:
+                    continue
                 new_path = path.copy()
                 new_path.append(edge)
                 frontier.append(new_path)
 
-        reset_variables()
-        return gacs
+        reset_vars()
+        return SLD_derivations
 
     def __str__(self):
         s = ''
