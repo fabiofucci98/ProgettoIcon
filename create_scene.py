@@ -310,7 +310,6 @@ def create_library():
 
 def create_stair():
     texture_list = arcade.SpriteList(is_static=True)
-    SPRITE_SIZE = 16
     texture = arcade.Sprite(
         "resources/stairs.png", 0.9)
     texture.angle = 90
@@ -323,12 +322,12 @@ def create_stair():
 
 def create_lift():
     texture_list = arcade.SpriteList(is_static=True)
-    SPRITE_SIZE = 16
     texture = arcade.Sprite(
         "resources/lift.png", 0.97)
     texture.center_x = 320
     texture.center_y = 54
     texture_list.append(texture)
+    print(texture.top, texture.bottom, texture.left, texture.right)
 
     return texture_list
 
