@@ -28,11 +28,13 @@ query = 'a,d'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 # Esempio con individui e regole
 query = 'rotto(X)'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 
 # Semplice derivazione con individui
 query = 'imm_west(X,Y)'
@@ -40,35 +42,44 @@ query = 'imm_west(X,Y)'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 
 # Derivazioni con naf
 query = 'a1'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 
 
 query = 'not_a1'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 
 # Derivazione con naf e predicati
 query = 'p(X)'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
 
 # Cicli
 query = 'a2'
 query = engine.parse_query(query)
 print(clean(engine.prove(query))
       )
+print(engine.how(query))
+
 query = engine.parse_query(input())
 while(True):
+    print(engine)
     if query:
         print(clean(engine.prove(query))
               )
+        print(engine.how(query))
+
     else:
         print('syntax error')
     query = engine.parse_query(input())
