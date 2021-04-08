@@ -23,3 +23,4 @@ Sintassi query e kb:
   Si usa la sintassi datalog spiegata sul libro, i predicati e costanti iniziano con lettera minuscola, le variabili con maiuscola  
   una clausola ha la forma predicato :- disgiunzione di predicati, la disgiunzione viene indicata con la virgola
   andare sempre a capo per una nuova regola 
+  le regole devono essere 'safe'
