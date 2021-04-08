@@ -1,5 +1,6 @@
 from re import findall
 from copy import deepcopy
+from typing import List
 
 
 class Clause:
@@ -36,6 +37,12 @@ class Predicate:
     def negate(self):
         return Predicate(self.pred[4:], self.args) if self.negated else Predicate('not_' + self.pred, self.args)
 
+    def contains_vars(self):
+        for arg in self.args:
+            if isinstance(arg, Variable):
+                return True
+        return False
+
 
 class Variable:
     def __init__(self, var):
@@ -49,10 +56,10 @@ class Variable:
         self.count = 0
 
     def __str__(self):
-        return str(self.var)+str(self.count)
+        return str(self.var)
 
     def __repr__(self):
-        return str(self.var)+str(self.count)
+        return str(self.var)
 
     def __eq__(self, o: object):
         return isinstance(o, Variable) and self.var == o.var and self.count == o.count
@@ -119,81 +126,20 @@ class Engine(object):
     """
 
     def prove(self, query: list, prove_one=False):
-
-        def substitute(clause, subs):
-            to_substitute = [sub[0] for sub in subs]
-            # clause = deepcopy(clause)
-            for i in range(len(clause.head.args)):
-                if clause.head.args[i] in to_substitute:
-                    clause.head.args[i] = subs[to_substitute.index(
-                        clause.head.args[i])][1]
-
-            for pred in clause.body:
-                for j in range(len(pred.args)):
-                    if pred.args[j] in to_substitute:
-                        pred.args[j] = subs[to_substitute.index(
-                            pred.args[j])][1]
-            return clause
-
-        def unify(t1, t2):
-            def replace(a, b, eqs, subs):
-                for i in range(len(eqs)):
-                    for j in range(len(eqs[i])):
-                        if eqs[i][j] == a:
-                            eqs[i][j] = b
-                for i in range(len(subs)):
-                    for j in range(len(subs[i])):
-                        if subs[i][j] == a:
-                            subs[i][j] = b
-            eqs = [[t1, t2]]
-            subs = []
-            while len(eqs) != 0:
-                a, b = eqs[0]
-                del eqs[0]
-                if a != b:
-                    if isinstance(a, Variable):
-                        replace(a, b, eqs, subs)
-                        subs.append([a, b])
-                    elif isinstance(b, Variable):
-                        replace(b, a, eqs, subs)
-                        subs.append(([b, a]))
-                    elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.args) == len(b.args) and a.pred == b.pred and len(a.args) > 0:
-                        for ai, bi in zip(a.args, b.args):
-                            eqs.append([ai, bi])
-                    else:
-                        return None
-            return subs
-
-        def rename_vars(clause):
-            for term in clause.head.args:
-                if isinstance(term, Variable):
-                    term.inc()
-            for pred in clause.body:
-                for term in pred.args:
-                    if isinstance(term, Variable):
-                        term.inc()
-            return clause
-
         def derive(gac):
-            def contains_vars(pred):
-                for arg in pred.args:
-                    if isinstance(arg, Variable):
-                        return True
-                return False
-
             neighbours = []
             for atom in gac.body:
                 idx = gac.body.index(atom)
                 if not atom.negated:
                     for clause in self.kb:
-                        renamed_clause = rename_vars(deepcopy(clause))
-                        sub = unify(renamed_clause.head, atom)
+                        renamed_clause = self.__rename_vars(deepcopy(clause))
+                        sub = self.__unify(renamed_clause.head, atom)
                         if isinstance(sub, list):
                             tmp_gac = deepcopy(gac)
                             del tmp_gac.body[idx]
                             tmp_gac.body[idx:idx] = renamed_clause.body
-                            neighbours.append(substitute(tmp_gac, sub))
-                elif not contains_vars(atom):
+                            neighbours.append(self.__substitute(tmp_gac, sub))
+                elif not atom.contains_vars():
                     if not self.prove([atom.negate()]):
                         neighbour = deepcopy(gac)
                         del neighbour.body[idx]
@@ -202,7 +148,6 @@ class Engine(object):
                         return []
                 else:
                     continue
-
             return neighbours
 
         def reset_vars():
@@ -215,14 +160,8 @@ class Engine(object):
                         if isinstance(term, Variable):
                             term.reset()
 
-        gac = Clause(Predicate('yes', []), query)
-        for pred in query:
-            for term in pred.args:
-                if isinstance(term, Variable):
-                    gac.head.args.append(term)
-
         SLD_derivations = []
-        frontier = [[gac]]
+        frontier = [[self.get_gac(query)]]
         while len(frontier) != 0:
             path = frontier[-1]
             del frontier[-1]
@@ -242,6 +181,98 @@ class Engine(object):
 
         reset_vars()
         return SLD_derivations
+
+    def __rename_vars(self, clause):
+        for term in clause.head.args:
+            if isinstance(term, Variable):
+                term.inc()
+        for pred in clause.body:
+            for term in pred.args:
+                if isinstance(term, Variable):
+                    term.inc()
+        return clause
+
+    def __substitute(self, clause, subs):
+        to_substitute = [sub[0] for sub in subs]
+        # clause = deepcopy(clause)
+        for i in range(len(clause.head.args)):
+            if clause.head.args[i] in to_substitute:
+                clause.head.args[i] = subs[to_substitute.index(
+                    clause.head.args[i])][1]
+
+        for pred in clause.body:
+            for j in range(len(pred.args)):
+                if pred.args[j] in to_substitute:
+                    pred.args[j] = subs[to_substitute.index(
+                        pred.args[j])][1]
+        return clause
+
+    def __unify(self, t1, t2):
+        def replace(a, b, eqs, subs):
+            for i in range(len(eqs)):
+                for j in range(len(eqs[i])):
+                    if eqs[i][j] == a:
+                        eqs[i][j] = b
+            for i in range(len(subs)):
+                for j in range(len(subs[i])):
+                    if subs[i][j] == a:
+                        subs[i][j] = b
+        eqs = [[t1, t2]]
+        subs = []
+        while len(eqs) != 0:
+            a, b = eqs[0]
+            del eqs[0]
+            if a != b:
+                if isinstance(a, Variable):
+                    replace(a, b, eqs, subs)
+                    subs.append([a, b])
+                elif isinstance(b, Variable):
+                    replace(b, a, eqs, subs)
+                    subs.append(([b, a]))
+                elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.args) == len(b.args) and a.pred == b.pred and len(a.args) > 0:
+                    for ai, bi in zip(a.args, b.args):
+                        eqs.append([ai, bi])
+                else:
+                    return None
+        return subs
+
+    def get_gac(self, query):
+        gac = Clause(Predicate('yes', []), query)
+        for pred in query:
+            for term in pred.args:
+                if isinstance(term, Variable):
+                    gac.head.args.append(term)
+        return gac
+
+    def how(self, query: list):
+        def find_rule(gac, der):
+            flag = False
+            for atom in gac.body:
+                idx = gac.body.index(atom)
+                if not atom.negated:
+                    for clause in self.kb:
+                        renamed_clause = self.__rename_vars(deepcopy(clause))
+                        sub = self.__unify(renamed_clause.head, atom)
+                        if isinstance(sub, list):
+                            tmp_gac = deepcopy(gac)
+                            del tmp_gac.body[idx]
+                            tmp_gac.body[idx:idx] = renamed_clause.body
+                            if der == self.__substitute(tmp_gac, sub):
+
+                                return clause
+                else:
+                    flag = True
+            if flag:
+                return 'naf'
+
+        SLD_ders = self.prove(query)
+        if not SLD_ders:
+            return None
+        dir_ders = []
+        for der in SLD_ders:
+            if der[1] not in dir_ders:
+                dir_ders.append(der[1])
+        return [find_rule(self.get_gac(query), der) for der in dir_ders]
 
     def __str__(self):
         s = ''
