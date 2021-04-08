@@ -127,8 +127,7 @@ class MyGame(arcade.Window):
         x, y = x-x % 16, y-y % 16
         robot_pos = self.player.position
         self.path = A_star(self.graph, [robot_pos], (x, y))
-        print ("partenza",robot_pos)
-        print("arrivo",x,y)
+        
 
 
     def cambia(self, robot_pos):
