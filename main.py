@@ -1,24 +1,26 @@
 import arcade
-import create_scene_ground_floor
-import create_scene_up_floor
-import create_scene_down_floor
+import arcade.gui
+from arcade.gui import UIManager
+from arcade.gui.ui_style import UIStyle
+import create_scene
 from graph import Graph
 from path_finding import A_star
 
 
 SPRITE_SIZE = 32
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 1296
 SCREEN_HEIGHT = 800
-
+SCREEN_WIDTH_ROOM = 800
+SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "Culo"
 
 
-class MyGame(arcade.Window):
+class MyGame(arcade.View):
 
-    def __init__(self, width, height, title):
+    def __init__(self):
 
-        super().__init__(width, height, title)
+        super().__init__()
 
         self.player_list = None
         self.wall_list = None
@@ -30,15 +32,38 @@ class MyGame(arcade.Window):
         self.graph = None
         self.timer = None
         self.timer_scene = 2
-
+        self.ui_manager = UIManager()
+        self.vai_qui=None
+        
+        
+        
+    def on_show_view(self):
+        self.setup_ground_floor((32*4,32))
+        self.setup_interface()
         arcade.set_background_color(arcade.color.WHITE)
+    def setup_interface(self):
+        self.ui_manager.purge_ui_elements()
+        
+        ui_input_box = arcade.gui.UIInputBox(
+            center_x=1000,
+            center_y=650,
+            width=300
+            
+        )
+        ui_input_box.text='Tettegrosse'
+        self.ui_manager.add_ui_element(ui_input_box)
+        self.button = MyFlatButton(
+            input_box=ui_input_box
+        )
+        self.ui_manager.add_ui_element(self.button)
 
     def setup_ground_floor(self, robot_pos):
+        
         self.check = 1
         self.player_list = arcade.SpriteList()
-        self.wall_list = create_scene_ground_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.texture_list = create_scene_ground_floor.create_not_collidable()
+        self.wall_list = create_scene.create_collidable_ground(
+            SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.texture_list = create_scene.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
         self.player.center_x, self.player.center_y = robot_pos
@@ -48,13 +73,14 @@ class MyGame(arcade.Window):
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player,
                                                          self.wall_list)
+       
 
     def setup_up_floor(self, robot_pos):
         self.check = 2
         self.player_list = arcade.SpriteList()
-        self.wall_list = create_scene_up_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.texture_list = create_scene_up_floor.create_not_collidable()
+        self.wall_list = create_scene.create_collidable_up(
+            SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.texture_list = create_scene.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
         self.player.center_x, self.player.center_y = robot_pos
@@ -68,9 +94,9 @@ class MyGame(arcade.Window):
     def setup_down_floor(self, robot_pos):
         self.check = 3
         self.player_list = arcade.SpriteList()
-        self.wall_list = create_scene_down_floor.create_collidable(
-            SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.texture_list = create_scene_down_floor.create_not_collidable()
+        self.wall_list = create_scene.create_collidable_down(
+            SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.texture_list = create_scene.create_not_collidable()
         self.player = arcade.Sprite(
             "resources/robottino.png")
         self.player.center_x, self.player.center_y = robot_pos
@@ -81,12 +107,12 @@ class MyGame(arcade.Window):
                                                          self.wall_list)
 
     def in_elevator(self): #271.5 - 368.5 / 15.2 - 92.8
-        if (self.player.position[0] > 303.5 and self.player.position[0] < 336.5) and (self.player.position[1] > 37.2 and self.player.position[1] < 64.1):
+        if (self.player.position[0] > 271.5 and self.player.position[0] < 368.5) and (self.player.position[1] > 15.2 and self.player.position[1] < 64.1):
             return True
         return False
 
     def in_stairs(self): #703.5 - 784.5 / 463.5 - 544.5
-        if (self.player.position[0] > 719.5 and self.player.position[0] < 768.5) and (self.player.position[1] > 479.5 and self.player.position[1] < 528.5):
+        if (self.player.position[0] > 719.5 and self.player.position[0] < 784.5) and (self.player.position[1] > 463.5 and self.player.position[1] < 544.5):
             return True
         return False
 
@@ -117,35 +143,70 @@ class MyGame(arcade.Window):
                 self.path = A_star(self.graph, [self.player.position], (688,512))
                 self.cambia(self.player.position)
 
+        if self.button.test != None:
+            self.path = A_star(self.graph, [self.player.position], (320,64))
+            
+            print(self.path)
+            self.button.test = None
+            
     def on_draw(self):
         arcade.start_render()
+        
         self.wall_list.draw()
         self.texture_list.draw()
         self.player_list.draw()
-
-    def on_mouse_press(self, x, y, button, modifiers):
-        x, y = x-x % 16, y-y % 16
-        robot_pos = self.player.position
-        self.path = A_star(self.graph, [robot_pos], (x, y))
+        
+       
         
 
-
+    def on_mouse_press(self, x, y, button, modifiers):
+        if x < SCREEN_WIDTH_ROOM:
+            x, y = x-x % 16, y-y % 16
+            robot_pos = self.player.position
+            self.path = A_star(self.graph, [robot_pos], (x, y))
+        
     def cambia(self, robot_pos):
         if self.check == 1:
-            self.clear()
+            
             self.setup_up_floor(robot_pos)
         elif self.check == 2:
-            self.clear()
+            
             self.setup_down_floor(robot_pos)
         elif self.check == 3:
-            self.clear()
+            
             self.setup_ground_floor(robot_pos)
 
 
+class MyFlatButton(arcade.gui.UIFlatButton):
+    def __init__(self, input_box):
+        super().__init__(
+            'CUCINA',
+            center_x=1000,
+            center_y=600,
+            width=150,
+            height=30
+            
+        )
+        self.test = None
+        self.input_box = input_box
+        self.set_style_attrs(
+            bg_color=arcade.color.BLUE,
+            bg_color_hover=arcade.color.RED,
+            bg_color_press=arcade.color.GREEN)
+    def on_click(self):
+        """ Called when user lets off button """
+        
+        print(f"Click flat button. {self.input_box.text} ")
+        self.test=self.input_box.text
+
+        
+
 def main():
     """ Main method """
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    window.setup_ground_floor((32*5, 32))
+    
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    view = MyGame()
+    window.show_view(view)
     arcade.run()
 
 
