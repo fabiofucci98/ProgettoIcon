@@ -3,11 +3,21 @@ import arcade
 WALL_RESOURCE = "resources/muro.png"
 
 
+def create_collidable(screen_width_room, screen_height_room, screen_width, screen_height, floor):
+    if floor == 1:
+        return create_collidable_ground(screen_width_room, screen_height_room, screen_width, screen_height)
+    elif floor == 2:
+        return create_collidable_up(screen_width_room, screen_height_room, screen_width, screen_height)
+    else:
+        return create_collidable_down(screen_width_room, screen_height_room, screen_width, screen_height)
+
+
 def create_collidable_ground(screen_width_room, screen_height_room, screen_width, screen_height):
     walls = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
 
-    walls.extend(create_outer_walls(screen_width_room, screen_height_room, screen_width, screen_height))
+    walls.extend(create_outer_walls(screen_width_room,
+                                    screen_height_room, screen_width, screen_height))
     walls.extend(create_lab(screen_height_room))
     walls.extend(create_bath())
     walls.extend(create_kitchen(screen_height_room))
@@ -18,11 +28,13 @@ def create_collidable_ground(screen_width_room, screen_height_room, screen_width
     walls.extend(create_desk_texture())
     return walls
 
+
 def create_collidable_up(screen_width_room, screen_height_room, screen_width, screen_height):
     walls = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
 
-    walls.extend(create_outer_walls(screen_width_room, screen_height_room, screen_width, screen_height_room))
+    walls.extend(create_outer_walls(screen_width_room,
+                                    screen_height_room, screen_width, screen_height_room))
     walls.extend(create_serra(screen_height_room))
     walls.extend(create_bedroom())
     walls.extend(create_double_room_up(screen_height_room))
@@ -30,14 +42,17 @@ def create_collidable_up(screen_width_room, screen_height_room, screen_width, sc
 
     return walls
 
+
 def create_collidable_down(screen_width_room, screen_height_room, screen_width, screen_height):
     walls = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
 
-    walls.extend(create_outer_walls(screen_width_room, screen_height_room, screen_width, screen_height_room))
+    walls.extend(create_outer_walls(screen_width_room,
+                                    screen_height_room, screen_width, screen_height_room))
     walls.extend(create_boiler())
     walls.extend(create_generator())
     return walls
+
 
 def create_not_collidable():
     texture = arcade.SpriteList(is_static=True)
@@ -104,8 +119,8 @@ def create_outer_walls(screen_width_room, screen_height_room, screen_width, scre
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    
-    #muro division interfaccia
+
+    # muro division interfaccia
     # muro superiore
     for i in range(int(screen_width_room/SPRITE_SIZE), int(screen_width/SPRITE_SIZE)):
         sprite = arcade.Sprite(
@@ -119,6 +134,8 @@ def create_outer_walls(screen_width_room, screen_height_room, screen_width, scre
     return wall_list
 
 # Ground Scene
+
+
 def create_lab(screen_height):
     SPRITE_SIZE = 16
     wall_list = arcade.SpriteList(
@@ -340,12 +357,13 @@ def create_library(screen_height):
 
 # Up Scene
 
+
 def create_serra(screen_height):
     SPRITE_SIZE = 16
     wall_list = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
-    #muri orizzontali
-    for i in range(1,7):
+    # muri orizzontali
+    for i in range(1, 7):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = SPRITE_SIZE*i+8
@@ -353,7 +371,7 @@ def create_serra(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range(12,32):
+    for i in range(12, 32):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = SPRITE_SIZE*i+8
@@ -361,7 +379,7 @@ def create_serra(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range(37,49):
+    for i in range(37, 49):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = SPRITE_SIZE*i+8
@@ -369,15 +387,16 @@ def create_serra(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    
+
     return wall_list
+
 
 def create_bedroom():
     SPRITE_SIZE = 16
     wall_list = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
-    #muri orizzontali
-    for i in range (1,3):
+    # muri orizzontali
+    for i in range(1, 3):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = SPRITE_SIZE*i+8
@@ -385,7 +404,7 @@ def create_bedroom():
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range (7,16):
+    for i in range(7, 16):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = SPRITE_SIZE*i+8
@@ -393,9 +412,9 @@ def create_bedroom():
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    
-    #muro verticale
-    for i in range (1,21):
+
+    # muro verticale
+    for i in range(1, 21):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = 16*SPRITE_SIZE+8
@@ -405,12 +424,13 @@ def create_bedroom():
         wall_list.append(sprite)
     return wall_list
 
+
 def create_double_room_up(screen_height):
     SPRITE_SIZE = 16
     wall_list = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
-    #muro orizzontale
-    for i in range(1,10):
+    # muro orizzontale
+    for i in range(1, 10):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = screen_height-SPRITE_SIZE*i+8
@@ -418,7 +438,7 @@ def create_double_room_up(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range(14,20):
+    for i in range(14, 20):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = screen_height-SPRITE_SIZE*i+8
@@ -426,7 +446,7 @@ def create_double_room_up(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range(24,27):
+    for i in range(24, 27):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = screen_height-SPRITE_SIZE*i+8
@@ -434,8 +454,8 @@ def create_double_room_up(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    #muri verticali
-    for i in range(1,18):
+    # muri verticali
+    for i in range(1, 18):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = screen_height-15*SPRITE_SIZE+8
@@ -443,7 +463,7 @@ def create_double_room_up(screen_height):
         sprite.center_x = x
         sprite.center_y = y
         wall_list.append(sprite)
-    for i in range(1,19):
+    for i in range(1, 19):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
         x = screen_height-27*SPRITE_SIZE+8
@@ -452,11 +472,11 @@ def create_double_room_up(screen_height):
         sprite.center_y = y
         wall_list.append(sprite)
     return wall_list
-    
+
 
 # Posizionamento delle texture
 
-#Texture collidable Ground
+# Texture collidable Ground
 def create_lib_texture():
     texture_list = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
@@ -485,49 +505,54 @@ def create_desk_texture():
     texture_list.append(texture)
     return texture_list
 
+
 def create_plants():
     texture_list = arcade.SpriteList(is_static=True)
-    for i in range(0,10):
+    for i in range(0, 10):
         texture = arcade.Sprite(
-            "resources/ObjSprite/pianta1.png",1)
+            "resources/ObjSprite/pianta1.png", 1)
         x = 80*i+40
         texture.center_x = x
         texture.center_y = 752
         texture_list.append(texture)
-    for i in range(0,10):
+    for i in range(0, 10):
         texture = arcade.Sprite(
-            "resources/ObjSprite/pianta3.png",1)
+            "resources/ObjSprite/pianta3.png", 1)
         x = 80*i+40
         texture.center_x = x
         texture.center_y = 688
         texture_list.append(texture)
-    for i in range(0,10):
+    for i in range(0, 10):
         texture = arcade.Sprite(
-            "resources/ObjSprite/pianta2.png",1)
+            "resources/ObjSprite/pianta2.png", 1)
         x = 80*i+40
         texture.center_x = x
         texture.center_y = 624
         texture_list.append(texture)
     return texture_list
 
+
 def create_boiler():
     texture_list = arcade.SpriteList(is_static=True)
     texture = arcade.Sprite(
-        "resources/ObjSprite/caldaia.png",1)
+        "resources/ObjSprite/caldaia.png", 1)
     texture.center_x = 736
     texture.center_y = 88
     texture_list.append(texture)
     return texture_list
 
+
 def create_generator():
     texture_list = arcade.SpriteList(is_static=True)
     texture = arcade.Sprite(
-        "resources/ObjSprite/generatore2.png",2)
+        "resources/ObjSprite/generatore2.png", 2)
     texture.center_x = 64
     texture.center_y = 668
     texture_list.append(texture)
     return texture_list
-#Not Collidible Obj
+# Not Collidible Obj
+
+
 def create_stair():
     texture_list = arcade.SpriteList(is_static=True)
     texture = arcade.Sprite(
@@ -537,6 +562,7 @@ def create_stair():
     texture.center_y = 504
     texture_list.append(texture)
     return texture_list
+
 
 def create_lift():
     texture_list = arcade.SpriteList(is_static=True)
