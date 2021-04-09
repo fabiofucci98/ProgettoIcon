@@ -25,11 +25,9 @@ class MyGame(arcade.View):
         self.robot = None
         self.wall_list = None
         self.texture_list = None
-        self.robot = None
         self.physics_engine = None
         self.path = None
         self.barrier_list = None
-        self.graph = None
         self.wall_list = None
         self.graph = None
 
