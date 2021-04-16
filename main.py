@@ -3,6 +3,7 @@ import arcade.gui
 from arcade.gui import UIManager
 from arcade.sprite_list import SpriteList
 import create_scene
+import GUI
 from path_finding.graph import Graph
 from path_finding.path_finding import A_star
 
@@ -15,6 +16,18 @@ SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "AILab"
 
+Stanze={}
+Stanze['Cucina'] = (368,128)
+Stanze['Laboratorio'] = (256,416)
+Stanze['Bagno'] = (80,224)
+Stanze['Libreria'] = (368,688)
+Stanze['Meccanica'] = (416,448)
+Stanze['Elettronica'] = (624,448)
+Stanze['Scale'] = (720,496)
+Stanze['Ascenzore'] = (320,48)
+Stanze['Serra'] = (560,544)
+Stanze['Camera da letto'] = (64,320)
+Stanze['Sgabuzzino'] = (608,228)
 
 class MyGame(arcade.View):
 
@@ -51,19 +64,13 @@ class MyGame(arcade.View):
 
     def setup_interface(self):
         self.ui_manager.purge_ui_elements()
-
-        ui_input_box = arcade.gui.UIInputBox(
-            center_x=1000,
-            center_y=650,
-            width=300
-
-        )
-        ui_input_box.text = 'Tettegrosse'
+        ui_input_box = GUI.QueryBox()
         self.ui_manager.add_ui_element(ui_input_box)
-        self.button = MyFlatButton(
+        self.button = GUI.OKButton(
             input_box=ui_input_box
         )
         self.ui_manager.add_ui_element(self.button)
+
 
     def change_floor(self):
         changes = {1: 2, 2: 3, 3: 1}
@@ -110,8 +117,8 @@ class MyGame(arcade.View):
                     self.graph, [self.robot.position], (688, 512))
                 self.change_floor()
 
-        if self.button.test != None:
-            self.path = A_star(self.graph, [self.robot.position], (320, 64))
+        if self.button.test in Stanze:
+            self.path = A_star(self.graph, [self.robot.position], Stanze[self.button.test])
             self.button.test = None
 
         self.physics_engine.update()
@@ -127,27 +134,8 @@ class MyGame(arcade.View):
             x, y = x-x % 16, y-y % 16
             robot_pos = self.robot.position
             self.path = A_star(self.graph, [robot_pos], (x, y))
+            print(x,y)
 
-
-class MyFlatButton(arcade.gui.UIFlatButton):
-    def __init__(self, input_box):
-        super().__init__(
-            'CUCINA',
-            center_x=1000,
-            center_y=600,
-            width=150,
-            height=30
-
-        )
-        self.test = None
-        self.input_box = input_box
-        self.set_style_attrs(
-            bg_color=arcade.color.BLUE,
-            bg_color_hover=arcade.color.RED,
-            bg_color_press=arcade.color.GREEN)
-
-    def on_click(self):
-        self.test = self.input_box.text
 
 
 def main():
