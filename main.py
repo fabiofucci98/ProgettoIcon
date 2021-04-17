@@ -16,18 +16,19 @@ SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "AILab"
 
-Stanze={}
-Stanze['Cucina'] = (368,128)
-Stanze['Laboratorio'] = (256,416)
-Stanze['Bagno'] = (80,224)
-Stanze['Libreria'] = (368,688)
-Stanze['Meccanica'] = (416,448)
-Stanze['Elettronica'] = (624,448)
-Stanze['Scale'] = (720,496)
-Stanze['Ascenzore'] = (320,48)
-Stanze['Serra'] = (560,544)
-Stanze['Camera da letto'] = (64,320)
-Stanze['Sgabuzzino'] = (608,228)
+Stanze = {}
+Stanze['Cucina'] = (368, 128)
+Stanze['Laboratorio'] = (256, 416)
+Stanze['Bagno'] = (80, 224)
+Stanze['Libreria'] = (368, 688)
+Stanze['Meccanica'] = (416, 448)
+Stanze['Elettronica'] = (624, 448)
+Stanze['Scale'] = (720, 496)
+Stanze['Ascenzore'] = (320, 48)
+Stanze['Serra'] = (560, 544)
+Stanze['Camera da letto'] = (64, 320)
+Stanze['Sgabuzzino'] = (608, 228)
+
 
 class MyGame(arcade.View):
 
@@ -56,6 +57,9 @@ class MyGame(arcade.View):
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.robot,
                                                          SpriteList())
+        self.cron = []
+        self.cron_changed = False
+        self.cron_draw_start = [100, 100]
 
     def on_show_view(self):
         self.change_floor()
@@ -70,7 +74,6 @@ class MyGame(arcade.View):
             input_box=ui_input_box
         )
         self.ui_manager.add_ui_element(self.button)
-
 
     def change_floor(self):
         changes = {1: 2, 2: 3, 3: 1}
@@ -118,8 +121,11 @@ class MyGame(arcade.View):
                 self.change_floor()
 
         if self.button.test in Stanze:
-            self.path = A_star(self.graph, [self.robot.position], Stanze[self.button.test])
+            self.path = A_star(
+                self.graph, [self.robot.position], Stanze[self.button.test])
+            self.cron.append(self.button.test)
             self.button.test = None
+            self.cron_changed = True
 
         self.physics_engine.update()
 
@@ -128,14 +134,22 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot.draw()
+        if self.cron:
+            arcade.draw_text(
+                self.cron[0], self.cron_draw_start[0], self.cron_draw_start[1], arcade.color.BLACK)
 
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
             x, y = x-x % 16, y-y % 16
             robot_pos = self.robot.position
             self.path = A_star(self.graph, [robot_pos], (x, y))
-            print(x,y)
+            print(x, y)
 
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        print(x, y, scroll_x, scroll_y)
+        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH:
+            print('culo')
+            self.cron_draw_start[1] += scroll_y*5
 
 
 def main():

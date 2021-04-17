@@ -2,9 +2,10 @@ import arcade
 import arcade.gui
 from arcade.gui import UIManager
 
-SPRITE_SIZE=16
+SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
 SCREEN_HEIGHT = 800
+
 
 class OKButton(arcade.gui.UIFlatButton):
     def __init__(self, input_box):
@@ -25,7 +26,6 @@ class OKButton(arcade.gui.UIFlatButton):
 
     def on_click(self):
         self.test = self.input_box.text
-        
 
 
 class QueryBox(arcade.gui.UIInputBox):
@@ -34,19 +34,19 @@ class QueryBox(arcade.gui.UIInputBox):
             center_x=SCREEN_WIDTH-18*SPRITE_SIZE,
             center_y=2*SPRITE_SIZE,
             width=26*SPRITE_SIZE,
-            height= 2*SPRITE_SIZE,
-            text ='Ciao'
+            height=2*SPRITE_SIZE,
+            text='Cucina'
         )
         self.set_style_attrs(
-            bg_color= arcade.color.WHITE,
-            bg_color_hover= arcade.color.WHITE_SMOKE,
-            bg_color_focus = arcade.color.WHITE_SMOKE,
-            font_color= arcade.color.BLACK,
-            font_color_hover = arcade.color.BLACK,
-            font_color_focus = arcade.color.BLACK,
-            border_color= arcade.color.BABY_BLUE,
-            border_color_hover = arcade.color.BABY_BLUE,
-            border_color_focus =arcade.color.BABY_BLUE,
+            bg_color=arcade.color.WHITE,
+            bg_color_hover=arcade.color.WHITE_SMOKE,
+            bg_color_focus=arcade.color.WHITE_SMOKE,
+            font_color=arcade.color.BLACK,
+            font_color_hover=arcade.color.BLACK,
+            font_color_focus=arcade.color.BLACK,
+            border_color=arcade.color.BABY_BLUE,
+            border_color_hover=arcade.color.BABY_BLUE,
+            border_color_focus=arcade.color.BABY_BLUE,
             border_width=2
-            
+
         )
