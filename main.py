@@ -57,9 +57,7 @@ class MyGame(arcade.View):
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.robot,
                                                          SpriteList())
-        self.cron = []
-        self.cron_changed = False
-        self.cron_draw_start = [100, 100]
+        self.to_draw = True
 
     def on_show_view(self):
         self.change_floor()
@@ -107,25 +105,20 @@ class MyGame(arcade.View):
         if self.timer_scene <= 2:
             self.timer_scene += delta_time
 
-        if self.in_elevator():
+        in_elevator = self.in_elevator()
+        in_stairs = self.in_stairs()
+        if in_elevator or in_stairs:
             if self.timer_scene > 2:
                 self.timer_scene = 0
                 self.path = A_star(
-                    self.graph, [self.robot.position], (320, 112))
-                self.change_floor()
-        elif self.in_stairs():
-            if self.timer_scene > 2:
-                self.timer_scene = 0
-                self.path = A_star(
-                    self.graph, [self.robot.position], (688, 512))
+                    self.graph, [self.robot.position], (688, 512) if in_stairs else (320, 112))
                 self.change_floor()
 
-        if self.button.test in Stanze:
+        text = self.button.get_text()
+        if self.button.pres and text in Stanze:
             self.path = A_star(
-                self.graph, [self.robot.position], Stanze[self.button.test])
-            self.cron.append(self.button.test)
-            self.button.test = None
-            self.cron_changed = True
+                self.graph, [self.robot.position], Stanze[text])
+            self.button.pres = False
 
         self.physics_engine.update()
 
@@ -134,22 +127,21 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot.draw()
-        if self.cron:
+        print(len(self.button.get_cron()))
+        for i, elem in enumerate(self.button.get_cron()):
             arcade.draw_text(
-                self.cron[0], self.cron_draw_start[0], self.cron_draw_start[1], arcade.color.BLACK)
+                elem, 100, 100-20*i, arcade.color.BLACK)
 
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
             x, y = x-x % 16, y-y % 16
             robot_pos = self.robot.position
             self.path = A_star(self.graph, [robot_pos], (x, y))
-            print(x, y)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        print(x, y, scroll_x, scroll_y)
+        # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH:
-            print('culo')
-            self.cron_draw_start[1] += scroll_y*5
+            self.button.cron_index += scroll_y
 
 
 def main():

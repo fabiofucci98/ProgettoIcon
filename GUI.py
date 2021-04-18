@@ -17,15 +17,24 @@ class OKButton(arcade.gui.UIFlatButton):
             height=2*SPRITE_SIZE
 
         )
-        self.test = None
         self.input_box = input_box
         self.set_style_attrs(
             bg_color=arcade.color.BLUE,
             bg_color_hover=arcade.color.RED,
             bg_color_press=arcade.color.GREEN)
+        self.cron = []
+        self.cron_index = 0
+        self.pres = False
 
     def on_click(self):
-        self.test = self.input_box.text
+        self.cron.append(self.input_box.text)
+        self.pres = True
+
+    def get_text(self):
+        return self.input_box.text
+
+    def get_cron(self):
+        return self.cron[self.cron_index:]
 
 
 class QueryBox(arcade.gui.UIInputBox):
