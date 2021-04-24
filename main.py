@@ -3,17 +3,31 @@ import arcade.gui
 from arcade.gui import UIManager
 from arcade.sprite_list import SpriteList
 import create_scene
+import GUI
 from path_finding.graph import Graph
 from path_finding.path_finding import A_star
 
 
-SPRITE_SIZE = 32
+SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH_ROOM = 800
 SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "AILab"
+
+Stanze = {}
+Stanze['Cucina'] = (368, 128)
+Stanze['Laboratorio'] = (256, 416)
+Stanze['Bagno'] = (80, 224)
+Stanze['Libreria'] = (368, 688)
+Stanze['Meccanica'] = (416, 448)
+Stanze['Elettronica'] = (624, 448)
+Stanze['Scale'] = (720, 496)
+Stanze['Ascensore'] = (320, 48)
+Stanze['Serra'] = (560, 544)
+Stanze['Camera da letto'] = (64, 320)
+Stanze['Sgabuzzino'] = (608, 228)
 
 
 class MyGame(arcade.View):
@@ -43,6 +57,7 @@ class MyGame(arcade.View):
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.robot,
                                                          SpriteList())
+        self.to_draw = True
 
     def on_show_view(self):
         self.change_floor()
@@ -51,17 +66,10 @@ class MyGame(arcade.View):
 
     def setup_interface(self):
         self.ui_manager.purge_ui_elements()
-
-        ui_input_box = arcade.gui.UIInputBox(
-            center_x=1000,
-            center_y=650,
-            width=300
-
-        )
-        ui_input_box.text = 'Tettegrosse'
-        self.ui_manager.add_ui_element(ui_input_box)
-        self.button = MyFlatButton(
-            input_box=ui_input_box
+        self.ui_input_box = GUI.QueryBox()
+        self.ui_manager.add_ui_element(self.ui_input_box)
+        self.button = GUI.OKButton(
+            input_box=self.ui_input_box
         )
         self.ui_manager.add_ui_element(self.button)
 
@@ -97,22 +105,26 @@ class MyGame(arcade.View):
         if self.timer_scene <= 2:
             self.timer_scene += delta_time
 
-        if self.in_elevator():
+        in_elevator = self.in_elevator()
+        in_stairs = self.in_stairs()
+        if in_elevator or in_stairs:
             if self.timer_scene > 2:
                 self.timer_scene = 0
                 self.path = A_star(
-                    self.graph, [self.robot.position], (320, 112))
-                self.change_floor()
-        elif self.in_stairs():
-            if self.timer_scene > 2:
-                self.timer_scene = 0
-                self.path = A_star(
-                    self.graph, [self.robot.position], (688, 512))
+                    self.graph, [self.robot.position], (688, 512) if in_stairs else (320, 112))
                 self.change_floor()
 
-        if self.button.test != None:
-            self.path = A_star(self.graph, [self.robot.position], (320, 64))
-            self.button.test = None
+        text = self.button.get_text()
+        if self.button.pres and text in Stanze:
+            self.path = A_star(
+                self.graph, [self.robot.position], Stanze[text])
+            self.button.pres = False
+            self.ui_input_box.text = ''
+        elif self.button.pres and text not in Stanze and text != "QueryBox":
+            self.button.pres = False
+            self.button.cron.remove(self.ui_input_box.text)
+            self.button.cron.append("[Invalid Query]")
+            self.ui_input_box.text = ''
 
         self.physics_engine.update()
 
@@ -121,6 +133,10 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot.draw()
+        # print(len(self.button.get_cron()))
+        for i, elem in enumerate(self.button.get_cron()):
+            arcade.draw_text(
+                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
 
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
@@ -128,26 +144,15 @@ class MyGame(arcade.View):
             robot_pos = self.robot.position
             self.path = A_star(self.graph, [robot_pos], (x, y))
 
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+        # aggiungere parte per scroll solo in riquadro basso a dx
+        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
+            self.button.cron_index += scroll_y
 
-class MyFlatButton(arcade.gui.UIFlatButton):
-    def __init__(self, input_box):
-        super().__init__(
-            'CUCINA',
-            center_x=1000,
-            center_y=600,
-            width=150,
-            height=30
-
-        )
-        self.test = None
-        self.input_box = input_box
-        self.set_style_attrs(
-            bg_color=arcade.color.BLUE,
-            bg_color_hover=arcade.color.RED,
-            bg_color_press=arcade.color.GREEN)
-
-    def on_click(self):
-        self.test = self.input_box.text
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ENTER:
+            if self.ui_input_box.focused is True:
+                self.button.on_click()
 
 
 def main():

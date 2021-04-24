@@ -51,6 +51,7 @@ def create_collidable_down(screen_width_room, screen_height_room, screen_width, 
                                     screen_height_room, screen_width, screen_height_room))
     walls.extend(create_boiler())
     walls.extend(create_generator())
+    walls.extend(create_car())
     return walls
 
 
@@ -548,6 +549,15 @@ def create_generator():
         "resources/ObjSprite/generatore2.png", 2)
     texture.center_x = 64
     texture.center_y = 668
+    texture_list.append(texture)
+    return texture_list
+
+def create_car():
+    texture_list = arcade.SpriteList(is_static=True)
+    texture = arcade.Sprite(
+        "resources/ObjSprite/car.png", 1)
+    texture.center_x = 400
+    texture.center_y = 400
     texture_list.append(texture)
     return texture_list
 # Not Collidible Obj
