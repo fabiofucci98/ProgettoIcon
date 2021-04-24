@@ -103,23 +103,9 @@ class Engine(object):
             return
 
         for line in f:
-            preds = self.parse_query(line)
+            preds = parse_query(line)
             if preds:
                 self.kb.append(Clause(preds[0], preds[1:]))
-
-    """
-    Restituisce tutti i predicati contenuti nella stringa query
-    """
-
-    def parse_query(self, query):
-        def parse_pred(pred):
-            l = findall('[a-zA-Z0-9_]+', pred)
-            for i in range(1, len(l)):
-                l[i] = Variable(
-                    l[i]) if l[i][0].isupper() else Constant(l[i])
-            pred = Predicate(l[0], l[1:])
-            return pred
-        return [parse_pred(pred) for pred in findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', query)]
 
     """
     Genera le derivazioni SLD ottenute a partire da query, vedere libro per documentazione dettagliata
@@ -285,3 +271,19 @@ class Engine(object):
         for clause in self.kb:
             s += str(clause)+'\n'
         return s
+
+
+"""
+Restituisce tutti i predicati contenuti nella stringa query
+"""
+
+
+def parse_query(query):
+    def parse_pred(pred):
+        l = findall('[a-zA-Z0-9_]+', pred)
+        for i in range(1, len(l)):
+            l[i] = Variable(
+                l[i]) if l[i][0].isupper() else Constant(l[i])
+        pred = Predicate(l[0], l[1:])
+        return pred
+    return [parse_pred(pred) for pred in findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', query)]

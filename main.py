@@ -1,3 +1,4 @@
+from re import A
 import arcade
 import arcade.gui
 from arcade.gui import UIManager
@@ -6,7 +7,7 @@ import create_scene
 import GUI
 from path_finding.graph import Graph
 from path_finding.path_finding import A_star
-
+import inference_engine.Engine as e
 
 SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
@@ -17,7 +18,6 @@ SCREEN_HEIGHT_ROOM = 800
 SCREEN_TITLE = "AILab"
 
 Stanze = {}
-Stanze['Cucina'] = (368, 128)
 Stanze['Laboratorio'] = (256, 416)
 Stanze['Bagno'] = (80, 224)
 Stanze['Libreria'] = (368, 688)
@@ -33,7 +33,6 @@ Stanze['Sgabuzzino'] = (608, 228)
 class MyGame(arcade.View):
 
     def __init__(self):
-
         super().__init__()
 
         self.robot = None
@@ -44,13 +43,15 @@ class MyGame(arcade.View):
         self.barrier_list = None
         self.wall_list = None
         self.graph = None
+        self.action = None
 
+        self.inference_engine = e.Engine()
+        self.inference_engine.load_kb('kb')
         self.timer = .1
         self.timer_scene = 2
         self.floor = 3
         self.ui_manager = UIManager()
-        self.robot = arcade.Sprite(
-            "resources/robottino.png")
+        self.robot = arcade.Sprite("resources/robottino.png")
         self.robot.center_x, self.robot.center_y = 32*4, 32
 
         self.texture_list = create_scene.create_not_collidable()
@@ -93,39 +94,10 @@ class MyGame(arcade.View):
         return False
 
     def on_update(self, delta_time):
-        # Controlli per aggiornamento posizione
-        if self.timer <= .1:
-            self.timer += delta_time
-        if self.path and self.timer > .1:
-            self.robot.position = self.path[0]
-            del self.path[0]
-            self.timer = 0
 
-        # Controlli per cambio piano
-        if self.timer_scene <= 2:
-            self.timer_scene += delta_time
-
-        in_elevator = self.in_elevator()
-        in_stairs = self.in_stairs()
-        if in_elevator or in_stairs:
-            if self.timer_scene > 2:
-                self.timer_scene = 0
-                self.path = A_star(
-                    self.graph, [self.robot.position], (688, 512) if in_stairs else (320, 112))
-                self.change_floor()
-
-        text = self.button.get_text()
-        if self.button.pres and text in Stanze:
-            self.path = A_star(
-                self.graph, [self.robot.position], Stanze[text])
-            self.button.pres = False
-            self.ui_input_box.text = ''
-        elif self.button.pres and text not in Stanze and text != "QueryBox":
-            self.button.pres = False
-            self.button.cron.remove(self.ui_input_box.text)
-            self.button.cron.append("[Invalid Query]")
-            self.ui_input_box.text = ''
-
+        # Controlli per cambio piano e aggiornamento posizione
+        self.update_position(delta_time)
+        self.update_ui()
         self.physics_engine.update()
 
     def on_draw(self):
@@ -138,11 +110,13 @@ class MyGame(arcade.View):
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
 
+    """
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
             x, y = x-x % 16, y-y % 16
             robot_pos = self.robot.position
             self.path = A_star(self.graph, [robot_pos], (x, y))
+    """
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
@@ -153,6 +127,65 @@ class MyGame(arcade.View):
         if key == arcade.key.ENTER:
             if self.ui_input_box.focused is True:
                 self.button.on_click()
+
+    def update_position(self, delta_time):
+
+        if self.timer <= .1:
+            self.timer += delta_time
+        if self.path and self.timer > .1:
+            self.robot.position = self.path[0]
+            del self.path[0]
+            self.timer = 0
+
+        if self.timer_scene <= 2:
+            self.timer_scene += delta_time
+
+        in_elevator = self.in_elevator()
+        in_stairs = self.in_stairs()
+        if in_elevator or in_stairs:
+            if self.timer_scene > 2:
+                self.timer_scene = 0
+                self.path = A_star(
+                    self.graph, [self.robot.position], (688, 512) if in_stairs else (320, 112))
+                self.change_floor()
+
+    def update_ui(self):
+        text = self.button.get_text()
+        if self.button.pres:
+            self.button.pres = False
+            self.ui_input_box.text = ''
+            self.action, message = self.act(text)
+            self.button.cron.append(message)
+
+    def act(self, text):
+        query = e.parse_query(text)
+        if len(query) == 1:
+            if query[0].pred == 'Muovi':
+                tmp_query = e.parse_query(
+                    'Posizione('+query[0].args[0].var+',X,Y)')
+                out = clean(self.inference_engine.prove(tmp_query))
+                x, y = int(out[0][1].const), int(out[0][2].const)
+                self.path = A_star(self.graph, [self.robot.position], (x, y))
+        return 'culo', 'OK'
+
+
+def clean(SLD_derivations):
+    if not isinstance(SLD_derivations, list):
+        return True
+
+    tmp_answers = [der[-1].head.args for der in SLD_derivations]
+    answers = []
+    for answer in tmp_answers:
+        if answer not in answers:
+            answers.append(answer)
+
+    if len(answers) == 0:
+        return False
+
+    elif len(answers) == 1 and len(answers[0]) == 0:
+        return True
+
+    return answers
 
 
 def main():
