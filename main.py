@@ -1,6 +1,7 @@
 import arcade
 import arcade.gui
 from arcade.gui import UIManager
+import keyboard
 from arcade.sprite_list import SpriteList
 import create_scene
 import GUI
@@ -8,7 +9,7 @@ from path_finding.graph import Graph
 from path_finding.path_finding import A_star
 
 
-SPRITE_SIZE = 32
+SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH_ROOM = 800
@@ -24,7 +25,7 @@ Stanze['Libreria'] = (368, 688)
 Stanze['Meccanica'] = (416, 448)
 Stanze['Elettronica'] = (624, 448)
 Stanze['Scale'] = (720, 496)
-Stanze['Ascenzore'] = (320, 48)
+Stanze['Ascensore'] = (320, 48)
 Stanze['Serra'] = (560, 544)
 Stanze['Camera da letto'] = (64, 320)
 Stanze['Sgabuzzino'] = (608, 228)
@@ -66,10 +67,10 @@ class MyGame(arcade.View):
 
     def setup_interface(self):
         self.ui_manager.purge_ui_elements()
-        ui_input_box = GUI.QueryBox()
-        self.ui_manager.add_ui_element(ui_input_box)
+        self.ui_input_box = GUI.QueryBox()
+        self.ui_manager.add_ui_element(self.ui_input_box)
         self.button = GUI.OKButton(
-            input_box=ui_input_box
+            input_box=self.ui_input_box
         )
         self.ui_manager.add_ui_element(self.button)
 
@@ -119,6 +120,13 @@ class MyGame(arcade.View):
             self.path = A_star(
                 self.graph, [self.robot.position], Stanze[text])
             self.button.pres = False
+            self.ui_input_box.text = ''
+        elif self.button.pres and text not in Stanze and text != "QueryBox":
+            self.button.pres = False
+            self.button.cron.remove(self.ui_input_box.text)
+            self.button.cron.append("[Invalid Query]")
+            self.ui_input_box.text = ''
+            
 
         self.physics_engine.update()
 
@@ -127,10 +135,11 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot.draw()
-        print(len(self.button.get_cron()))
+        #print(len(self.button.get_cron()))
         for i, elem in enumerate(self.button.get_cron()):
             arcade.draw_text(
-                elem, 100, 100-20*i, arcade.color.BLACK)
+                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
+            
 
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
@@ -140,9 +149,15 @@ class MyGame(arcade.View):
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
-        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH:
+        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             self.button.cron_index += scroll_y
-
+    
+    def on_key_press(self,key,modifiers):
+        if key == arcade.key.ENTER:
+            if self.ui_input_box.focused is True:
+                self.button.on_click()
+                
+    
 
 def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
