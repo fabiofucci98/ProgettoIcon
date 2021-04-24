@@ -27,7 +27,7 @@ class OKButton(arcade.gui.UIFlatButton):
         self.pres = False
 
     def on_click(self):
-        self.cron.append(self.input_box.text)
+        self.cron.append('>>'+self.input_box.text)
         self.pres = True
 
     def get_text(self):
@@ -44,7 +44,7 @@ class QueryBox(arcade.gui.UIInputBox):
             center_y=2*SPRITE_SIZE,
             width=26*SPRITE_SIZE,
             height=2*SPRITE_SIZE,
-            text='QueryBox'
+            text=''
         )
         self.set_style_attrs(
             bg_color=arcade.color.WHITE,
