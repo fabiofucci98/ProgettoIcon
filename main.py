@@ -1,7 +1,6 @@
 import arcade
 import arcade.gui
 from arcade.gui import UIManager
-import keyboard
 from arcade.sprite_list import SpriteList
 import create_scene
 import GUI
@@ -126,7 +125,6 @@ class MyGame(arcade.View):
             self.button.cron.remove(self.ui_input_box.text)
             self.button.cron.append("[Invalid Query]")
             self.ui_input_box.text = ''
-            
 
         self.physics_engine.update()
 
@@ -135,11 +133,10 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot.draw()
-        #print(len(self.button.get_cron()))
+        # print(len(self.button.get_cron()))
         for i, elem in enumerate(self.button.get_cron()):
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
-            
 
     def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
@@ -151,13 +148,12 @@ class MyGame(arcade.View):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             self.button.cron_index += scroll_y
-    
-    def on_key_press(self,key,modifiers):
+
+    def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:
             if self.ui_input_box.focused is True:
                 self.button.on_click()
-                
-    
+
 
 def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)

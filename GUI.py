@@ -1,7 +1,6 @@
 import arcade
 import arcade.gui
 from arcade.gui import UIManager
-import keyboard
 
 SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
@@ -30,14 +29,14 @@ class OKButton(arcade.gui.UIFlatButton):
     def on_click(self):
         self.cron.append(self.input_box.text)
         self.pres = True
-        
+
     def get_text(self):
         return self.input_box.text
 
     def get_cron(self):
         return self.cron[self.cron_index:]
-    
-    
+
+
 class QueryBox(arcade.gui.UIInputBox):
     def __init__(self):
         super().__init__(
@@ -60,8 +59,9 @@ class QueryBox(arcade.gui.UIInputBox):
             border_width=2
 
         )
+
     def on_click(self):
-        self.text=''
+        self.text = ''
         self.set_style_attrs(
             font_color=arcade.color.BLACK,
             font_color_hover=arcade.color.BLACK,
