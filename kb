@@ -1,1 +1,5 @@
-Posizione(Cucina,368,128)
+Posizione(cucina,368,128,1)
+Posizione(ascensore,320,48,all)
+Posizione(scale,720,496,all)
+Posizione(meccanica,320,128,3)
+Posizione(serra,560,544,2)

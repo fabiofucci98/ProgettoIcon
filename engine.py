@@ -1,6 +1,5 @@
 from re import findall
 from copy import deepcopy
-from typing import List
 
 
 class Clause:
