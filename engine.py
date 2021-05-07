@@ -1,7 +1,6 @@
 import string
 from copy import deepcopy
-from typing import cast
-from built_in import built_ins
+from built_in import built_in_preds, rec_solve  # , solve_funcs
 
 
 class Clause:
@@ -67,17 +66,25 @@ class Variable:
 
 
 class Constant:
-    def __init__(self, const):
+    def __init__(self, const, args=[]):
         self.const = const
+        self.args = args
 
     def __str__(self):
-        return str(self.const)
+        return str(self.const)+str(self.args)
 
     def __repr__(self):
-        return str(self.const)
+        return str(self.const)+str(self.args)
 
     def __eq__(self, o: object):
-        return isinstance(o, Constant) and self.const == o.const
+        if not isinstance(o, Constant):
+            return False
+
+        if len(o.args) == len(self.args):
+            for i in range(len(self.args)):
+                if not o.args[i] == self.args[i]:
+                    return False
+        return self.const == o.const
 
 
 class Engine(object):
@@ -122,15 +129,16 @@ class Engine(object):
 
     def prove(self, query: list, prove_one=False, abduce=False):
         def derive(gac, abduce):
+            #gac = solve_funcs(gac)
             neighbours = []
             for atom in gac.body:
                 if abduce and atom in self.ass:
                     continue
                 idx = gac.body.index(atom)
                 if not atom.negated:
-                    if atom.pred in built_ins:
+                    if atom.pred in built_in_preds:
                         try:
-                            f = built_ins[atom.pred]
+                            f = built_in_preds[atom.pred]
                             if f(*atom.args):
                                 tmp_gac = deepcopy(gac)
                                 del tmp_gac.body[idx]
@@ -238,6 +246,11 @@ class Engine(object):
         subs = []
         while len(eqs) != 0:
             a, b = eqs[0]
+            if isinstance(a, Constant):
+                replace(a, rec_solve(a), eqs, subs)
+            if isinstance(b, Constant):
+                replace(b, rec_solve(b), eqs, subs)
+
             del eqs[0]
             if a != b:
                 if isinstance(a, Variable):
@@ -339,11 +352,12 @@ def get_tree(s):
         raise ParseException
     letters = string.ascii_letters
     numbers = '0123456789'
+    symbols = '_-+/*^'
     elem = ''
     parentheses_check = 0
     tree = Tree()
     for i in range(len(s)):
-        if s[i] in letters or s[i] == '_' or s[i] == '-' or s[i] == '/' or s[i] == '*' or s[i] in numbers:
+        if s[i] in letters or s[i] in symbols or s[i] in numbers:
             elem += s[i]
             continue
         if elem != '':
@@ -386,4 +400,5 @@ def rec_parse(tree):
             raise ParseException
         return Variable(tree.node)
     else:
-        return Constant(tree.node)
+        args = [rec_parse(child) for child in tree.childs]
+        return Constant(tree.node, args)
