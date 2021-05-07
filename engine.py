@@ -1,5 +1,7 @@
-from re import findall
+import string
 from copy import deepcopy
+from typing import cast
+from built_in import built_ins
 
 
 class Clause:
@@ -84,38 +86,58 @@ class Engine(object):
         self.kb = []
 
     """
-    Carica la kb, la carica da un file di deafult se non riesce con il file filename
+    Carica la kb, la carica da filename
     """
 
     def load_kb(self, filename=None):
-        f = None
-        for tries in range(3):
-            try:
-                f = open(filename, 'r')
-                break
-            except (TypeError, FileNotFoundError):
-                pass
-
-            if tries == 1:
-                filename = 'kb_rel'
-        if tries == 3:
-            return
-
+        f = open(filename, 'r')
+        kb = []
+        ass = []
+        ass_flag = False
         for line in f:
-            preds = parse_query(line)
+            if line[-1] == '\n':
+                line = line[0:-1]
+            if line == '':
+                continue
+
+            if line == 'ass:':
+                ass_flag = True
+                continue
+
+            preds = parse(line)
             if preds:
-                self.kb.append(Clause(preds[0], preds[1:]))
+                kb.append(Clause(preds[0], preds[1:]))
+
+            if ass_flag and len(preds) == 1:
+                ass.append(preds[0])
+            elif ass_flag and len(preds) > 1:
+                raise ParseException
+
+        self.kb = kb
+        self.ass = ass
 
     """
     Genera le derivazioni SLD ottenute a partire da query, vedere libro per documentazione dettagliata
     """
 
-    def prove(self, query: list, prove_one=False):
-        def derive(gac):
+    def prove(self, query: list, prove_one=False, abduce=False):
+        def derive(gac, abduce):
             neighbours = []
             for atom in gac.body:
+                if abduce and atom in self.ass:
+                    continue
                 idx = gac.body.index(atom)
                 if not atom.negated:
+                    if atom.pred in built_ins:
+                        try:
+                            f = built_ins[atom.pred]
+                            if f(*atom.args):
+                                tmp_gac = deepcopy(gac)
+                                del tmp_gac.body[idx]
+                                neighbours.append(tmp_gac)
+                                continue
+                        except Exception:
+                            pass
                     for clause in self.kb:
                         renamed_clause = self.__rename_vars(deepcopy(clause))
                         sub = self.__unify(renamed_clause.head, atom)
@@ -131,8 +153,6 @@ class Engine(object):
                         neighbours.append(neighbour)
                     else:
                         return []
-                else:
-                    continue
             return neighbours
 
         def reset_vars():
@@ -145,21 +165,33 @@ class Engine(object):
                         if isinstance(term, Variable):
                             term.reset()
 
+        def abduce_criterion(G):
+            for atom in G.body:
+                if atom not in self.ass:
+                    return False
+
+            return True
+
         SLD_derivations = []
+        closed_list = []
         frontier = [[self.get_gac(query)]]
+
         while len(frontier) != 0:
             path = frontier[-1]
             del frontier[-1]
-            if len(path[-1].body) == 0:
+            if path[-1] in closed_list:
+                continue
+            else:
+                closed_list.append(path[-1])
+            if (len(path[-1].body) == 0 and not abduce) or (abduce and abduce_criterion(path[-1])):
                 if path not in SLD_derivations:
                     if prove_one:
-                        return True
+                        reset_vars()
+                        return path
                     SLD_derivations.append(path)
                     continue
-            neighbours = derive(path[-1])
+            neighbours = derive(path[-1], abduce)
             for edge in neighbours:
-                if edge in path:
-                    continue
                 new_path = path.copy()
                 new_path.append(edge)
                 frontier.append(new_path)
@@ -272,17 +304,86 @@ class Engine(object):
         return s
 
 
-"""
-Restituisce tutti i predicati contenuti nella stringa query
-"""
+class ParseException(Exception):
+    pass
 
 
-def parse_query(query):
-    def parse_pred(pred):
-        l = findall('[a-zA-Z0-9_]+', pred)
-        for i in range(1, len(l)):
-            l[i] = Variable(
-                l[i]) if l[i][0].isupper() else Constant(l[i])
-        pred = Predicate(l[0], l[1:])
-        return pred
-    return [parse_pred(pred) for pred in findall('[a-zA-Z0-9_]+(?:\([a-zA-Z0-9_,]+\))?', query)]
+class Tree:
+    def __init__(self, node=None, childs=None, parent=None):
+        self.node = node
+        self.childs = childs if childs != None else []
+        self.parent = parent
+
+    def __repr__(self):
+        childs = ''
+        for child in self.childs:
+            childs += str(child)+','
+        childs = childs[:-1]
+        if len(childs) == 0:
+            return str(self.node)
+        return str(self.node)+'('+childs+')'
+
+    def __str__(self):
+        childs = ''
+        for child in self.childs:
+            childs += str(child)+','
+        childs = childs[:-1]
+        if len(childs) == 0:
+            return str(self.node)
+
+        return str(self.node)+'('+childs+')'
+
+
+def get_tree(s):
+    if s[-1] != '.':
+        raise ParseException
+    letters = string.ascii_letters
+    numbers = '0123456789'
+    elem = ''
+    parentheses_check = 0
+    tree = Tree()
+    for i in range(len(s)):
+        if s[i] in letters or s[i] == '_' or s[i] == '-' or s[i] == '/' or s[i] == '*' or s[i] in numbers:
+            elem += s[i]
+            continue
+        if elem != '':
+            tree.childs.append(Tree(node=elem, parent=tree))
+        elem = ''
+        if s[i] == '(':
+            tree = tree.childs[-1]
+            parentheses_check += 1
+        elif s[i] == ')':
+            tree = tree.parent
+            parentheses_check -= 1
+
+    if parentheses_check != 0:
+        raise ParseException
+    return tree
+
+
+def parse(s):
+    tree = get_tree(s)
+    return [rec_parse(child) for child in tree.childs]
+
+
+def rec_parse(tree):
+    def get_depth(tree):
+        i = -1
+        while tree.parent != None:
+            i += 1
+            tree = tree.parent
+
+        return i
+
+    if get_depth(tree) == 0:
+        if tree.node[0].isupper():
+            raise ParseException
+        args = [rec_parse(child) for child in tree.childs]
+        return Predicate(tree.node, args)
+
+    elif tree.node[0].isupper():
+        if len(tree.childs) > 0:
+            raise ParseException
+        return Variable(tree.node)
+    else:
+        return Constant(tree.node)
