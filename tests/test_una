@@ -1,0 +1,6 @@
+passed_two_courses(S) : not_equals(C1,C2) , passed(S,C1), passed(S,C2).
+
+passed(S,C) : grade(S,C,M), greater(M,50).
+
+grade(sam,engl101,87).
+grade(sam,phys101,89).
