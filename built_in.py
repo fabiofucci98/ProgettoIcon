@@ -1,3 +1,5 @@
+#Predicati
+
 def less(a, b):
     return eval(a.const+'<'+b.const)
 
@@ -15,6 +17,7 @@ def equals(a, b):
         return True
     return eval(a.const+'=='+b.const)
 
+#Funzioni
 
 def succ(n):
     return eval(n.const+'+1')
