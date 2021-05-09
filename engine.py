@@ -277,7 +277,7 @@ class Engine(object):
                 pred.args[j] = rec_sub(pred.args[j], to_sub, subs)
         return clause
 
-    def __unify(self, t1, t2, occur_check):
+    def __unify(self, t1, t2, occurs_check_var):
         def occur_check(X, const):
             if isinstance(const, Variable):
                 return X == const
@@ -316,12 +316,12 @@ class Engine(object):
 
             if a != b:
                 if isinstance(a, Variable):
-                    if occur_check and isinstance(b, Constant) and occur_check(a, b):
+                    if occurs_check_var and isinstance(b, Constant) and occur_check(a, b):
                         return None
                     replace(a, b, eqs, subs)
                     subs.append([a, b])
                 elif isinstance(b, Variable):
-                    if occur_check and isinstance(a, Constant) and occur_check(b, a):
+                    if occurs_check_var and isinstance(a, Constant) and occur_check(b, a):
                         return None
                     replace(b, a, eqs, subs)
                     subs.append(([b, a]))
@@ -340,7 +340,7 @@ class Engine(object):
                     gac.head.args.append(term)
         return gac
 
-    def how(self, query: list, occurs_check=False):
+    def how(self, query: list, occurs_check=True):
         def find_rule(gac, der, occurs_check):
             flag = False
             for atom in gac.body:
