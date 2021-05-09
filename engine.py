@@ -1,7 +1,6 @@
 import string
 from copy import deepcopy
-from typing import cast
-from built_in import built_ins
+from built_in import built_in_preds, built_in_funcs
 
 
 class Clause:
@@ -67,17 +66,27 @@ class Variable:
 
 
 class Constant:
-    def __init__(self, const):
+    def __init__(self, const, args=[]):
         self.const = const
+        self.args = args
 
     def __str__(self):
-        return str(self.const)
+        return str(self.const)+str(self.args)
 
     def __repr__(self):
-        return str(self.const)
+        return str(self.const)+str(self.args)
 
     def __eq__(self, o: object):
-        return isinstance(o, Constant) and self.const == o.const
+        if not isinstance(o, Constant):
+            return False
+
+        if len(self.args) != len(o.args):
+            return False
+
+        for i in range(len(self.args)):
+            if self.args[i] != o.args[i]:
+                return False
+        return self.const == o.const
 
 
 class Engine(object):
@@ -122,15 +131,43 @@ class Engine(object):
 
     def prove(self, query: list, prove_one=False, abduce=False):
         def derive(gac, abduce):
+            def rec_solve(const):
+                if const.const in built_in_funcs:
+                    args = [rec_solve(arg) for arg in const.args]
+                    for i in range(len(args)):
+                        if not isinstance(args[i], Constant):
+                            args[i] = Constant(str(args[i]))
+                    const.args = args
+                    return Constant(str(built_in_funcs[const.const](*const.args)))
+                else:
+                    return const
+
+            def solve_f(gac):
+                for i in range(len(gac.head.args)):
+                    try:
+                        sub = rec_solve(gac.head.args[i])
+                        self.__substitute(gac, [[gac.head.args[i], sub]])
+                    except:
+                        pass
+                for pred in gac.body:
+                    for j in range(len(pred.args)):
+                        try:
+                            sub = rec_solve(pred.args[j])
+                            self.__substitute(gac, [[pred.args[j], sub]])
+                        except:
+                            pass
+                return gac
+
+            gac = solve_f(gac)
             neighbours = []
             for atom in gac.body:
                 if abduce and atom in self.ass:
                     continue
                 idx = gac.body.index(atom)
                 if not atom.negated:
-                    if atom.pred in built_ins:
+                    if atom.pred in built_in_preds:
                         try:
-                            f = built_ins[atom.pred]
+                            f = built_in_preds[atom.pred]
                             if f(*atom.args):
                                 tmp_gac = deepcopy(gac)
                                 del tmp_gac.body[idx]
@@ -139,13 +176,15 @@ class Engine(object):
                         except Exception:
                             pass
                     for clause in self.kb:
-                        renamed_clause = self.__rename_vars(deepcopy(clause))
+                        renamed_clause = self.__rename_vars(
+                            deepcopy(clause))
                         sub = self.__unify(renamed_clause.head, atom)
                         if isinstance(sub, list):
                             tmp_gac = deepcopy(gac)
                             del tmp_gac.body[idx]
                             tmp_gac.body[idx:idx] = renamed_clause.body
-                            neighbours.append(self.__substitute(tmp_gac, sub))
+                            neighbours.append(
+                                self.__substitute(tmp_gac, sub))
                 elif not atom.contains_vars():
                     if not self.prove([atom.negate()]):
                         neighbour = deepcopy(gac)
@@ -225,6 +264,18 @@ class Engine(object):
         return clause
 
     def __unify(self, t1, t2):
+        def occur_check(X, const):
+            if isinstance(const, Variable):
+                return X == const
+            elif len(const.args) == 0:
+                return False
+            else:
+                for arg in const.args:
+                    if occur_check(X, arg):
+                        return True
+
+                return False
+
         def replace(a, b, eqs, subs):
             for i in range(len(eqs)):
                 for j in range(len(eqs[i])):
@@ -239,11 +290,16 @@ class Engine(object):
         while len(eqs) != 0:
             a, b = eqs[0]
             del eqs[0]
+
             if a != b:
                 if isinstance(a, Variable):
+                    if isinstance(b, Constant) and occur_check(a, b):
+                        return None
                     replace(a, b, eqs, subs)
                     subs.append([a, b])
                 elif isinstance(b, Variable):
+                    if isinstance(a, Constant) and occur_check(b, a):
+                        return None
                     replace(b, a, eqs, subs)
                     subs.append(([b, a]))
                 elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.args) == len(b.args) and a.pred == b.pred and len(a.args) > 0:
@@ -334,56 +390,54 @@ class Tree:
         return str(self.node)+'('+childs+')'
 
 
-def get_tree(s):
-    if s[-1] != '.':
-        raise ParseException
-    letters = string.ascii_letters
-    numbers = '0123456789'
-    elem = ''
-    parentheses_check = 0
-    tree = Tree()
-    for i in range(len(s)):
-        if s[i] in letters or s[i] == '_' or s[i] == '-' or s[i] == '/' or s[i] == '*' or s[i] in numbers:
-            elem += s[i]
-            continue
-        if elem != '':
-            tree.childs.append(Tree(node=elem, parent=tree))
-        elem = ''
-        if s[i] == '(':
-            tree = tree.childs[-1]
-            parentheses_check += 1
-        elif s[i] == ')':
-            tree = tree.parent
-            parentheses_check -= 1
-
-    if parentheses_check != 0:
-        raise ParseException
-    return tree
-
-
 def parse(s):
+    def get_tree(s):
+        if s[-1] != '.':
+            raise ParseException
+        letters = string.ascii_letters
+        numbers = '0123456789'
+        elem = ''
+        parentheses_check = 0
+        tree = Tree()
+        for i in range(len(s)):
+            if s[i] in letters or s[i] == '_' or s[i] == '-' or s[i] == '/' or s[i] == '*' or s[i] in numbers:
+                elem += s[i]
+                continue
+            if elem != '':
+                tree.childs.append(Tree(node=elem, parent=tree))
+            elem = ''
+            if s[i] == '(':
+                tree = tree.childs[-1]
+                parentheses_check += 1
+            elif s[i] == ')':
+                tree = tree.parent
+                parentheses_check -= 1
+
+        if parentheses_check != 0:
+            raise ParseException
+        return tree
+
+    def rec_parse(tree):
+        def get_depth(tree):
+            i = -1
+            while tree.parent != None:
+                i += 1
+                tree = tree.parent
+
+            return i
+
+        if get_depth(tree) == 0:
+            if tree.node[0].isupper():
+                raise ParseException
+            args = [rec_parse(child) for child in tree.childs]
+            return Predicate(tree.node, args)
+
+        elif tree.node[0].isupper():
+            if len(tree.childs) > 0:
+                raise ParseException
+            return Variable(tree.node)
+        else:
+            args = [rec_parse(child) for child in tree.childs]
+            return Constant(tree.node, args)
     tree = get_tree(s)
     return [rec_parse(child) for child in tree.childs]
-
-
-def rec_parse(tree):
-    def get_depth(tree):
-        i = -1
-        while tree.parent != None:
-            i += 1
-            tree = tree.parent
-
-        return i
-
-    if get_depth(tree) == 0:
-        if tree.node[0].isupper():
-            raise ParseException
-        args = [rec_parse(child) for child in tree.childs]
-        return Predicate(tree.node, args)
-
-    elif tree.node[0].isupper():
-        if len(tree.childs) > 0:
-            raise ParseException
-        return Variable(tree.node)
-    else:
-        return Constant(tree.node)

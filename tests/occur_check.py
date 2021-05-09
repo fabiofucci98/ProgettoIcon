@@ -22,8 +22,7 @@ v = Variable('X')
 print(occur_check(v,c))
 
 en = e.Engine()
-en.rec_replace(v,Variable('Y'),c)
-print(occur_check(v,c))
+
 
 en.load_kb('occur_check')
 q = e.parse('lt(Y,Y).')
