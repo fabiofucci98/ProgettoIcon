@@ -10,4 +10,8 @@ en.load_kb('test_una')
 
 q = e.parse('passed_two_courses(sam).')
 ans = en.prove(q)
-print(ans)
+
+
+for a in ans:
+    for b in a:
+        print(b)
