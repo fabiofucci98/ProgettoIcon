@@ -13,15 +13,6 @@ SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "AILab"
 
-Stanze = {}
-Stanze['Laboratorio'] = (256, 416)
-Stanze['Bagno'] = (80, 224)
-Stanze['Libreria'] = (368, 688)
-Stanze['Meccanica'] = (416, 448)
-Stanze['Elettronica'] = (624, 448)
-Stanze['Camera da letto'] = (64, 320)
-Stanze['Sgabuzzino'] = (608, 228)
-
 
 class MyGame(arcade.View):
 

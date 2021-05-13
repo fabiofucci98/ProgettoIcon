@@ -92,4 +92,4 @@ def A_star(G, S, goal):
 def euclidean_distance(last, goal):
     x1, y1 = last
     x2, y2 = goal
-    return sqrt(pow(x1-x2, 2)+pow(y1-y2, 2))//16
+    return sqrt(pow(x1-x2, 2)+pow(y1-y2, 2))/GRID_CHUNK_SIZE
