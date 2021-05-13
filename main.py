@@ -79,13 +79,17 @@ class MyGame(arcade.View):
         self.texture_list.draw()
         self.robot_sprite.draw()
         for i, elem in enumerate(self.button.get_cron()):
+            if i > 16:
+                break
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
-            self.button.cron_index += int(scroll_y)
+            updated_index = self.button.cron_index + int(scroll_y)
+            if updated_index >= 0 and updated_index < len(self.button.cron):
+                self.button.cron_index = updated_index
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:

@@ -1,5 +1,5 @@
 from path_finding import Graph, A_star, euclidean_distance
-from engine import Engine, parse_query
+from engine import Engine, parse
 
 
 class QueryException(Exception):
@@ -17,9 +17,9 @@ class Agent:
         self.floor_to_go = None
 
     def act(self, text):
-        query = parse_query(text)
+        query = parse(text)
         if len(query) == 1:
-            if query[0].pred == 'Muovi':
+            if query[0].pred == 'muovi':
                 try:
                     self.path = self.move(query[0].args[0].const)
                 except QueryException:
@@ -30,8 +30,8 @@ class Agent:
 
     def move(self, query):
         def get_pos(obj):
-            tmp_query = parse_query(
-                'Posizione('+obj+',X,Y,Floor)')
+            tmp_query = parse(
+                'posizione('+obj+',X,Y,Floor).')
             out = clean(self.engine.prove(tmp_query))
             if out == False or query == 'scale' or query == 'ascensore':
                 raise QueryException
