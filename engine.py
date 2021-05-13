@@ -173,6 +173,8 @@ class Engine(object):
                                 del tmp_gac.body[idx]
                                 neighbours.append(tmp_gac)
                                 continue
+                            else:
+                                return []
                         except Exception:
                             pass
                     for clause in self.kb:
@@ -333,11 +335,30 @@ class Engine(object):
         return subs
 
     def __get_gac(self, query):
+        flat_list = []
+
+        def get_vars(term):
+            if isinstance(term, Variable):
+                return term
+            vars = []
+            for arg in term.args:
+                vars.append(get_vars(arg))
+            return vars
+
+        def flatten_list(data):
+            for element in data:
+                if type(element) == list:
+                    flatten_list(element)
+                else:
+                    flat_list.append(element)
+
         gac = Clause(Predicate('yes', []), query)
+        vars = []
         for pred in query:
             for term in pred.args:
-                if isinstance(term, Variable):
-                    gac.head.args.append(term)
+                vars.append(get_vars(term))
+        flatten_list(vars)
+        gac.head.args = flat_list
         return gac
 
     def how(self, query: list, occurs_check=True):

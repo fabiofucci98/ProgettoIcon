@@ -1,4 +1,4 @@
-#Predicati
+# Predicati
 
 def less(a, b):
     return eval(a.const+'<'+b.const)
@@ -17,10 +17,15 @@ def equals(a, b):
         return True
     return eval(a.const+'=='+b.const)
 
-#Funzioni
+# Funzioni
+
 
 def succ(n):
     return eval(n.const+'+1')
+
+
+def prec(n):
+    return eval(n.const+'-1')
 
 
 def sum(a, b):
@@ -39,7 +44,7 @@ def sub(a, b):
     return eval(a.const+'-'+b.const)
 
 
-built_in_funcs = {'succ': succ, 'sum': sum,
+built_in_funcs = {'succ': succ, 'prec': prec, 'sum': sum,
                   'mul': mul, 'div': div, 'sub': sub}
 
 
