@@ -382,7 +382,7 @@ class Engine(object):
             if flag:
                 return 'naf'
 
-        SLD_ders = self.prove(query, occurs_check)
+        SLD_ders = self.prove(query, occurs_check=occurs_check)
         if not SLD_ders:
             return None
         dir_ders = []
