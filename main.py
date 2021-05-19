@@ -17,18 +17,6 @@ SCREEN_HEIGHT_ROOM = 800
 
 SCREEN_TITLE = "AILab"
 
-Stanze = {}
-Stanze['Laboratorio'] = (256, 416)
-Stanze['Bagno'] = (80, 224)
-Stanze['Libreria'] = (368, 688)
-Stanze['Meccanica'] = (416, 448)
-Stanze['Elettronica'] = (624, 448)
-Stanze['Scale'] = (720, 496)
-Stanze['Ascensore'] = (320, 48)
-Stanze['Serra'] = (560, 544)
-Stanze['Camera da letto'] = (64, 320)
-Stanze['Sgabuzzino'] = (608, 228)
-
 
 class MyGame(arcade.View):
 
@@ -73,6 +61,16 @@ class MyGame(arcade.View):
             input_box=self.ui_input_box
         )
         self.ui_manager.add_ui_element(self.button)
+        self.cmdLblList()
+        
+    
+    def cmdLblList(self):
+        self.comandText = ["Luci ON/OFF", "IRRIGAZIONE ON/OFF", "TUA MADRE ON/OFF"]
+        self.lblList = []
+        for p, text in enumerate(self.comandText):
+            self.comandLabel = GUI.ComandLabel(text,p)
+            self.ui_manager.add_ui_element(self.comandLabel)
+            self.lblList.append(self.comandLabel)
 
     def change_floor(self):
         changes = {1: 2, 2: 3, 3: 1}
@@ -99,6 +97,7 @@ class MyGame(arcade.View):
         self.update_position(delta_time)
         self.update_ui()
         self.physics_engine.update()
+        #print([lable.font_color for lable in self.lblList])
 
     def on_draw(self):
         arcade.start_render()
@@ -109,19 +108,19 @@ class MyGame(arcade.View):
         for i, elem in enumerate(self.button.get_cron()):
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
-
-    """
-    def on_mouse_press(self, x, y, button, modifiers):
+        
+  
+    """def on_mouse_press(self, x, y, button, modifiers):
         if x < SCREEN_WIDTH_ROOM:
             x, y = x-x % 16, y-y % 16
             robot_pos = self.robot.position
-            self.path = A_star(self.graph, [robot_pos], (x, y))
-    """
+            self.path = A_star(self.graph, [robot_pos], (x, y))"""
+    
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
-            self.button.cron_index += scroll_y
+            self.button.cron_index += int(scroll_y)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:
