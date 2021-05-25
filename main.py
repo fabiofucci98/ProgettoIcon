@@ -73,7 +73,7 @@ class MyGame(arcade.View):
         self.update_position(delta_time)
         self.update_ui()
         self.physics_engine.update()
-        
+
 
     def on_draw(self):
         arcade.start_render()
@@ -85,9 +85,7 @@ class MyGame(arcade.View):
                 break
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
-           
-
-    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+   def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             updated_index = self.button.cron_index + int(scroll_y)
@@ -123,7 +121,6 @@ def in_elevator(robot_pos):
         if robot_pos[0] == 320 and robot_pos[1] == 48:
             return True
         return False
-
 
 def in_stairs(robot_pos):
     if robot_pos[0] == 720 and robot_pos[1] == 496:
