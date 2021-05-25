@@ -1,6 +1,5 @@
 import arcade
 import arcade.gui
-from arcade.gui import UIManager
 
 SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
@@ -66,41 +65,3 @@ class QueryBox(arcade.gui.UIInputBox):
             font_color=arcade.color.BLACK,
             font_color_hover=arcade.color.BLACK,
             font_color_focus=arcade.color.BLACK)
-
-
-class ComandLabel(arcade.gui.UILabel):
-    def __init__(self,text,p):
-        super().__init__(
-            text=text,
-            center_x=1040,
-            center_y=SCREEN_HEIGHT-2*SPRITE_SIZE-8-p*2*SPRITE_SIZE,
-            width=28*SPRITE_SIZE,
-            align='left'
-        )
-
-        self.set_style_attrs(
-            font_size=SPRITE_SIZE,
-            font_color=arcade.color.GO_GREEN,
-            font_color_focus=arcade.color.GO_GREEN,
-            font_color_hover=arcade.color.GO_GREEN,
-            font_color_press=arcade.color.RED
-        )
-        self.click=False
- 
-    def on_click(self):
-        if self.click==False:
-            self.set_style_attrs(
-                font_color=arcade.color.RED,
-                font_color_focus=arcade.color.RED,
-                font_color_hover=arcade.color.RED,
-                font_color_press=arcade.color.GO_GREEN
-            )
-            self.click=True
-        else:
-            self.set_style_attrs(
-                font_color=arcade.color.GO_GREEN,
-                font_color_focus=arcade.color.GO_GREEN,
-                font_color_hover=arcade.color.GO_GREEN,
-                font_color_press=arcade.color.RED
-            )
-            self.click=False
