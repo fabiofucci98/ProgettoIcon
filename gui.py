@@ -1,6 +1,6 @@
 import arcade
 import arcade.gui
-from arcade.gui import UIManager
+
 
 SPRITE_SIZE = 16
 SCREEN_WIDTH = 1296
