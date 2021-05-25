@@ -51,12 +51,12 @@ class MyGame(arcade.View):
         self.cmdLblList()
         arcade.set_background_color(arcade.color.WHITE)
 
-    
     def cmdLblList(self):
-        self.comandText = ["Luci ON/OFF", "IRRIGAZIONE ON/OFF", "TUA MADRE ON/OFF"]
+        self.comandText = ["Luci ON/OFF",
+                           "IRRIGAZIONE ON/OFF", "TUA MADRE ON/OFF"]
         self.lblList = []
         for p, text in enumerate(self.comandText):
-            self.comandLabel = gui.ComandLabel(text,p)
+            self.comandLabel = gui.ComandLabel(text, p)
             self.ui_manager.add_ui_element(self.comandLabel)
             self.lblList.append(self.comandLabel)
 
@@ -74,7 +74,6 @@ class MyGame(arcade.View):
         self.update_ui()
         self.physics_engine.update()
 
-
     def on_draw(self):
         arcade.start_render()
         self.wall_list.draw()
@@ -85,7 +84,8 @@ class MyGame(arcade.View):
                 break
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
-   def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
+
+    def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             updated_index = self.button.cron_index + int(scroll_y)
@@ -116,16 +116,18 @@ class MyGame(arcade.View):
             self.action, message = self.robot.act(text)
             self.button.cron.append(message)
 
-    
+
 def in_elevator(robot_pos):
-        if robot_pos[0] == 320 and robot_pos[1] == 48:
-            return True
-        return False
+    if robot_pos[0] == 320 and robot_pos[1] == 48:
+        return True
+    return False
+
 
 def in_stairs(robot_pos):
     if robot_pos[0] == 720 and robot_pos[1] == 496:
         return True
     return False
+
 
 def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
