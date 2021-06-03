@@ -1,3 +1,4 @@
+from engine import parse
 from agent import Agent
 import arcade
 import arcade.gui
@@ -52,8 +53,7 @@ class MyGame(arcade.View):
         arcade.set_background_color(arcade.color.WHITE)
 
     def cmdLblList(self):
-        self.comandText = ["Luci ON/OFF",
-                           "IRRIGAZIONE ON/OFF", "TUA MADRE ON/OFF"]
+        self.comandText = [str(ass) for ass in self.robot.engine.ass]
         self.lblList = []
         for p, text in enumerate(self.comandText):
             self.comandLabel = gui.ComandLabel(text, p)
@@ -68,10 +68,10 @@ class MyGame(arcade.View):
         self.robot.floor_to_go = None
 
     def on_update(self, delta_time):
-
-        # Controlli per cambio piano e aggiornamento posizione
         self.update_position(delta_time)
+        self.robot.update_path(delta_time)
         self.update_ui()
+        self.update_assumables()
         self.physics_engine.update()
 
     def on_draw(self):
@@ -109,12 +109,24 @@ class MyGame(arcade.View):
             self.timer = 0
 
     def update_ui(self):
-        text = self.button.get_text()
         if self.button.pres:
+            text = self.button.get_text()
             self.button.pres = False
             self.ui_input_box.text = ''
-            self.action, message = self.robot.act(text)
-            self.button.cron.append(message)
+            self.robot.act(text)
+
+        if self.robot.message:
+            self.button.cron.extend(self.robot.message)
+            self.robot.message = []
+
+    def update_assumables(self):
+        str_ass = [str(ass) for ass in self.robot.engine.ass]
+        for ass in self.lblList:
+            parsed = parse(ass.text+'.')[0]
+            if not ass.click and str(parsed) not in str_ass:
+                self.robot.engine.ass.append(parsed)
+            elif ass.click and str(parsed) in str_ass:
+                del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
 
 
 def in_elevator(robot_pos):
@@ -133,6 +145,7 @@ def main():
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     view = MyGame()
     window.show_view(view)
+
     arcade.run()
 
 

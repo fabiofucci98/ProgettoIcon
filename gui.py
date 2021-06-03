@@ -93,9 +93,11 @@ class QueryBox(arcade.gui.UIInputBox):
             border_color=arcade.color.BABY_BLUE,
             border_color_hover=arcade.color.BABY_BLUE,
             border_color_focus=arcade.color.BABY_BLUE,
-            border_width=2
+            border_width=2,
+            font_size=15
 
         )
+        self.stored_text = ''
 
     def on_click(self):
         self.text = ''
