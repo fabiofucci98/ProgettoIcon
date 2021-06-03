@@ -1,4 +1,3 @@
-from arcade.color import FASHION_FUCHSIA
 from path_finding import Graph, A_star, euclidean_distance
 from engine import Engine, ParseException, parse
 from math import inf
