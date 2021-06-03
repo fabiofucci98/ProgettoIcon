@@ -18,12 +18,7 @@ def p(kb, ass):
 
 
 en = e.Engine()
-en.load_kb('test_false')
+en.load_kb('test_false_ind')
 q = e.parse('false.')
-ans = en.prove(q, abduce=True)
-print([elem[-1] for elem in ans])
-
-en.load_kb('test_abduce')
-q = e.parse('wheezing.')
 ans = en.prove(q, abduce=True)
 print([elem[-1] for elem in ans])

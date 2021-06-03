@@ -27,7 +27,11 @@ def clean(SLD_derivations):
 
     return answers
 
-
+query = 'not_pp(d).'
+query = e.parse(query)
+print(clean(engine.prove(query))
+      )
+print(engine.how(query))
 # Primo esempio con un albero di derivazione più profondo
 query = 'a,d.'
 query = e.parse(query)

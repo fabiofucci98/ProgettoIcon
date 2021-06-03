@@ -55,10 +55,23 @@ def get_chunks_positions(barrier: arcade.Sprite):
 
 
 def A_star(G, S, goal):
+    def get_dist(el1, el2):
+        if el1[0] == el2[0] or el1[1] == el2[1]:
+            return 1
+        return 1.4
+
+    def get_cost(path):
+        el1 = path[0]
+        dist = 0
+        for el2 in path:
+            dist += get_dist(el1, el2)
+            el1 = el2
+        return dist
+
     def ordered_insert(frontier, path):
         i = 0
         while i < len(frontier):
-            if len(frontier[i])+euclidean_distance(frontier[i][-1], goal) < len(path)+euclidean_distance(path[-1], goal):
+            if get_cost(frontier[i])+euclidean_distance(frontier[i][-1], goal) < get_cost(path)+euclidean_distance(path[-1], goal):
                 i += 1
             else:
                 break

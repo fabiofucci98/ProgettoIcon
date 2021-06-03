@@ -9,10 +9,20 @@ class Clause:
         self.body = body
 
     def __str__(self):
-        return str(self.head)+' :- '+str(self.body)
+        tmp_str = str(self.head) + ': '
+        for i, atom in enumerate(self.body):
+            tmp_str += str(atom)
+            if i != len(self.body)-1:
+                tmp_str += ', '
+        return tmp_str
 
     def __repr__(self):
-        return str(self.head)+' :- '+str(self.body)
+        tmp_str = str(self.head) + ': '
+        for i, atom in enumerate(self.body):
+            tmp_str += str(atom)
+            if i != len(self.body)-1:
+                tmp_str += ', '
+        return tmp_str
 
     def __eq__(self, o: object):
         return isinstance(o, Clause) and self.head == o.head and self.body == o.body
@@ -26,10 +36,26 @@ class Predicate:
             self.pred) > 4 and self.pred[0:4] == 'not_' else False
 
     def __str__(self):
-        return str(self.pred)+str(self.args)
+        tmp_str = str(self.pred)
+        if len(self.args) > 0:
+            tmp_str += '('
+            for i, arg in enumerate(self.args):
+                tmp_str += str(arg)
+                if i != len(self.args)-1:
+                    tmp_str += ', '
+            tmp_str += ')'
+        return tmp_str
 
     def __repr__(self):
-        return str(self.pred)+str(self.args)
+        tmp_str = str(self.pred)
+        if len(self.args) > 0:
+            tmp_str += '('
+            for i, arg in enumerate(self.args):
+                tmp_str += str(arg)
+                if i != len(self.args)-1:
+                    tmp_str += ', '
+            tmp_str += ')'
+        return tmp_str
 
     def __eq__(self, o: object):
         return isinstance(o, Predicate) and self.pred == o.pred and self.args == o.args
@@ -71,10 +97,26 @@ class Constant:
         self.args = args
 
     def __str__(self):
-        return str(self.const)+str(self.args)
+        tmp_str = str(self.const)
+        if len(self.args) > 0:
+            tmp_str += '('
+            for i, arg in enumerate(self.args):
+                tmp_str += str(arg)
+                if i != len(self.args)-1:
+                    tmp_str += ', '
+            tmp_str += ')'
+        return tmp_str
 
     def __repr__(self):
-        return str(self.const)+str(self.args)
+        tmp_str = str(self.const)
+        if len(self.args) > 0:
+            tmp_str += '('
+            for i, arg in enumerate(self.args):
+                tmp_str += str(arg)
+                if i != len(self.args)-1:
+                    tmp_str += ', '
+            tmp_str += ')'
+        return tmp_str
 
     def __eq__(self, o: object):
         if not isinstance(o, Constant):
@@ -95,10 +137,10 @@ class Engine(object):
         self.kb = []
 
     """
-    Carica la kb, la carica da filename
+    Carica la kb da filename
     """
 
-    def load_kb(self, filename=None):
+    def load_kb(self, filename):
         f = open(filename, 'r')
         kb = []
         ass = []
@@ -126,7 +168,7 @@ class Engine(object):
         self.ass = ass
 
     """
-    Genera le derivazioni SLD ottenute a partire da query, vedere libro per documentazione dettagliata
+    Genera le derivazioni SLD ottenute a partire da query
     """
 
     def prove(self, query: list, prove_one=False, abduce=False, occurs_check=True):
