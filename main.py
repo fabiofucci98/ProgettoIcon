@@ -1,4 +1,4 @@
-from engine import parse
+from engine import Clause, parse
 from agent import Agent
 import arcade
 import arcade.gui
@@ -19,11 +19,8 @@ class MyGame(arcade.View):
 
     def __init__(self):
         super().__init__()
-
+        arcade.set_background_color(arcade.color.WHITE)
         self.texture_list = None
-        self.physics_engine = None
-        self.action = None
-
         self.floor = 1
         self.wall_lists = [create_scene.create_collidable(
             SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT, floor) for floor in range(1, 4)]
@@ -34,38 +31,23 @@ class MyGame(arcade.View):
         self.wall_list = self.wall_lists[0]
         self.timer = .1
         self.ui_manager = UIManager()
-
+        self.ui_input_box = gui.QueryBox()
+        self.ui_manager.add_ui_element(self.ui_input_box)
+        self.messages = []
+        self.button = gui.OkButton(self.ui_input_box, self.messages)
+        self.ui_manager.add_ui_element(self.button)
         self.texture_list = create_scene.create_not_collidable()
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.robot_sprite,
                                                          self.wall_list)
-        self.to_draw = True
-
-    def on_show_view(self):
-        self.ui_manager.purge_ui_elements()
-        self.ui_input_box = gui.QueryBox()
-        self.ui_manager.add_ui_element(self.ui_input_box)
-        self.button = gui.OKButton(
-            input_box=self.ui_input_box
-        )
-        self.ui_manager.add_ui_element(self.button)
-        self.cmdLblList()
-        arcade.set_background_color(arcade.color.WHITE)
-
-    def cmdLblList(self):
-        self.comandText = [str(ass) for ass in self.robot.engine.ass]
         self.lblList = []
-        for p, text in enumerate(self.comandText):
-            self.comandLabel = gui.ComandLabel(text, p)
-            self.ui_manager.add_ui_element(self.comandLabel)
-            self.lblList.append(self.comandLabel)
+        self.messages_index = 0
 
-    def change_floor(self, floor):
-        self.floor = floor
-        self.wall_list = self.wall_lists[floor-1]
-        self.physics_engine.walls = self.wall_list
-        self.robot.floor = floor
-        self.robot.floor_to_go = None
+        for p, text in enumerate(self.robot.engine.ass):
+            comandLabel = gui.ComandLabel(str(text), p)
+            self.ui_manager.add_ui_element(comandLabel)
+            self.lblList.append(comandLabel)
+        self.robot.lblList = self.lblList
 
     def on_update(self, delta_time):
         self.update_position(delta_time)
@@ -79,7 +61,7 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot_sprite.draw()
-        for i, elem in enumerate(self.button.get_cron()):
+        for i, elem in enumerate(self.messages[self.messages_index:]):
             if i > 16:
                 break
             arcade.draw_text(
@@ -88,9 +70,9 @@ class MyGame(arcade.View):
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
-            updated_index = self.button.cron_index + int(scroll_y)
-            if updated_index >= 0 and updated_index < len(self.button.cron):
-                self.button.cron_index = updated_index
+            updated_index = self.messages_index + int(scroll_y)
+            if updated_index >= 0 and updated_index < len(self.messages):
+                self.messages_index = updated_index
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:
@@ -116,17 +98,28 @@ class MyGame(arcade.View):
             self.robot.act(text)
 
         if self.robot.message:
-            self.button.cron.extend(self.robot.message)
+            self.messages.extend(self.robot.message)
             self.robot.message = []
 
     def update_assumables(self):
+
         str_ass = [str(ass) for ass in self.robot.engine.ass]
         for ass in self.lblList:
             parsed = parse(ass.text+'.')[0]
             if not ass.click and str(parsed) not in str_ass:
+                self.robot.engine.kb.append(Clause(parsed))
                 self.robot.engine.ass.append(parsed)
             elif ass.click and str(parsed) in str_ass:
                 del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
+                del self.robot.engine.kb[self.robot.engine.kb.index(
+                    Clause(parsed))]
+
+    def change_floor(self, floor):
+        self.floor = floor
+        self.wall_list = self.wall_lists[floor-1]
+        self.physics_engine.walls = self.wall_list
+        self.robot.floor = floor
+        self.robot.floor_to_go = None
 
 
 def in_elevator(robot_pos):

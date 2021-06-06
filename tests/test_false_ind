@@ -13,7 +13,7 @@ live(l1) : live(w0).
 live(w0) : live(w1), up(s2), ok(s2).
 live(w0) : live(w2), down(s2), ok(s2).
 live(w1) : live(w3), up(s1), ok(s1).
-live(w2) : live(w3), down(ss1), ok(s1).
+live(w2) : live(w3), down(s1), ok(s1).
 live(l2) : live(w4).
 live(w4) : live(w3), up(s3), ok(s3).
 live(p1) : live(w3).
