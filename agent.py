@@ -1,13 +1,14 @@
 from path_finding import Graph, A_star, euclidean_distance
-from engine import Engine, ParseException, parse
+from engine import Clause, Engine, ParseException, parse
 from math import inf
 
 ELEVATOR_POS = 320, 48
 STAIRS_POS = 720, 496
 
-
+"""
 class QueryException(Exception):
     pass
+"""
 
 
 class Agent:
@@ -44,47 +45,25 @@ class Agent:
         else:
             try:
                 query = parse(text)
+            except ParseException:
+                self.message.extend(['Sintassi errata'])
+                return
+            if len(query) == 1 and query[0].pred == 'muovi' and len(query[0].args) == 1:
+                pos = self.get_pos(query[0].args[0])
+                if not pos:
+                    self.message.extend(['Non ho capito'])
+                    return
+                path = self.get_path(pos)
+                if path:
+                    self.message.extend(['Ok'])
+                    self.path = path
+                else:
+                    self.message.extend(['Non posso arrivarci'])
+
+            else:
                 ans = clean(self.engine.prove(query, self.options['one'],
                                               self.options['abduce'], self.options['occurs']), self.options['abduce'])
                 self.message.extend([str(elem) for elem in ans])
-            except ParseException:
-                self.message.extend(['Sintassi errata'])
-        """
-        if len(query) == 1:
-            if query[0].pred == 'muovi':
-                try:
-                    self.path = self.move(query[0].args[0].const)
-                except QueryException:
-                    return ['Non ho capito']
-                if self.path == None:
-                    return ['Non posso arrivarci']
-            return ['OK']
-        """
-
-    """
-    def move(self, query):
-
-        x, y, floor = self.get_pos(query)
-        if floor == self.floor:
-            return A_star(
-                self.graphs[floor-1], [self.sprite.position], (x, y))
-        else:
-            self.floor_to_go = floor
-            stairs_pos = self.get_pos('scale')
-            elevator_pos = self.get_pos('ascensore')
-            stairs_pos = (stairs_pos[0], stairs_pos[1])
-            elevator_pos = (elevator_pos[0], elevator_pos[1])
-            island_pos = self.get_island(stairs_pos, elevator_pos, (x, y))
-            island_to_goal = A_star(self.graphs[floor-1], [island_pos], (x, y))
-            if island_to_goal == []:
-                return None
-            robot_to_island = A_star(
-                self.graphs[self.floor-1], [self.sprite.position], island_pos)
-            if robot_to_island == []:
-                return None
-
-            return robot_to_island + island_to_goal[1:]
-    """
 
     def solve_conflicts(self):
         def get_ind(conflict):
@@ -146,24 +125,35 @@ class Agent:
 
         ans = clean(self.engine.prove(
             parse('false.'), abduce=True), abduce=True)
+        conflict = min_conflict(ans)
+        if len(conflict) == 0:
+            self.message.extend(['Non ci sono conflitti da risolvere'])
+            return
         self.message.extend(
             ['Ho trovato i seguenti conflitti']+[str(elem) for elem in ans]+[''])
-        conflict = min_conflict(ans)
         self.message.extend(['Risolverò']+[str(conflict)]+[''])
         inds = get_ind(conflict)
         inds_pos = [self.get_pos(ind) for ind in inds]
         self.pos_ind_dict = dict(zip(inds_pos, inds))
         self.route = branch_and_bound(inds_pos)
+        self.conflict = []
+        for pos in self.route:
+            for c in conflict:
+                if self.pos_ind_dict[pos] in c.args:
+                    self.conflict.append(c)
+                    break
+
         self.message.extend(['In questo ordine'] +
                             [str(self.pos_ind_dict[pos]) for pos in self.route]+[''])
         self.options['solve'] = True
-        self.engine.ass = []
 
     def get_pos(self, ind):
         ind = str(ind)
         tmp_query = parse(
             'posizione('+ind+',X,Y,Floor).')
         out = clean(self.engine.prove(tmp_query))
+        if out == ['False']:
+            return
         x, y, floor = int(out[0][0].const), int(
             out[0][1].const), int(out[0][2].const)
         return x, y, floor
@@ -173,6 +163,17 @@ class Agent:
             if self.solve_timer >= 1:
                 self.message.extend(
                     ['Ho risolto '+self.options['solving']])
+                del self.engine.kb[self.engine.kb.index(
+                    Clause(self.conflict[0]))]
+                del self.engine.ass[self.engine.ass.index(self.conflict[0])]
+                str_ass = [str(ass) for ass in self.engine.ass]
+                for ass in self.lblList:
+                    parsed = parse(ass.text+'.')[0]
+                    if not ass.click and str(parsed) not in str_ass:
+                        ass.on_click()
+
+                del self.conflict[0]
+
                 self.options['solving'] = None
                 self.solve_timer = 0
             else:
@@ -215,6 +216,8 @@ class Agent:
 def clean(SLD_derivations, abduce=False):
     if abduce:
         tmp_answers = [ans[-1].body for ans in SLD_derivations]
+        if len(tmp_answers) == 0:
+            return ['False']
         return tmp_answers
     tmp_answers = [der[-1].head.args for der in SLD_derivations]
     answers = []
@@ -232,7 +235,6 @@ def clean(SLD_derivations, abduce=False):
 
 
 def get_island(p1, p2):
-
     eu_stairs = euclidean_distance(p1, STAIRS_POS)
     eu_elevator = euclidean_distance(
         p1, ELEVATOR_POS)

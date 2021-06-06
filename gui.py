@@ -33,7 +33,6 @@ class ComandLabel(arcade.gui.UILabel):
                 font_color_hover=arcade.color.RED,
                 font_color_press=arcade.color.GO_GREEN
             )
-            self.click = True
         else:
             self.set_style_attrs(
                 font_color=arcade.color.GO_GREEN,
@@ -41,11 +40,11 @@ class ComandLabel(arcade.gui.UILabel):
                 font_color_hover=arcade.color.GO_GREEN,
                 font_color_press=arcade.color.RED
             )
-            self.click = False
+        self.click = not self.click
 
 
-class OKButton(arcade.gui.UIFlatButton):
-    def __init__(self, input_box):
+class OkButton(arcade.gui.UIFlatButton):
+    def __init__(self, input_box, cron):
         super().__init__(
             'OK',
             center_x=SCREEN_WIDTH-3*SPRITE_SIZE,
@@ -59,8 +58,7 @@ class OKButton(arcade.gui.UIFlatButton):
             bg_color=arcade.color.BLUE,
             bg_color_hover=arcade.color.RED,
             bg_color_press=arcade.color.GREEN)
-        self.cron = []
-        self.cron_index = 0
+        self.cron = cron
         self.pres = False
 
     def on_click(self):
@@ -69,9 +67,6 @@ class OKButton(arcade.gui.UIFlatButton):
 
     def get_text(self):
         return self.input_box.text
-
-    def get_cron(self):
-        return self.cron[self.cron_index:]
 
 
 class QueryBox(arcade.gui.UIInputBox):
