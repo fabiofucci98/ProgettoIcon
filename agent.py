@@ -158,7 +158,7 @@ class Agent:
             out[0][1].const), int(out[0][2].const)
         return x, y, floor
 
-    def update_path(self, delta_time):
+    def update_path(self, delta_time, ass_lbls, ass_colors):
         if not self.path and self.options['solving']:
             if self.solve_timer >= 1:
                 self.message.extend(
@@ -166,11 +166,11 @@ class Agent:
                 del self.engine.kb[self.engine.kb.index(
                     Clause(self.conflict[0]))]
                 del self.engine.ass[self.engine.ass.index(self.conflict[0])]
+
                 str_ass = [str(ass) for ass in self.engine.ass]
-                for ass in self.lblList:
-                    parsed = parse(ass.text+'.')[0]
-                    if not ass.click and str(parsed) not in str_ass:
-                        ass.on_click()
+                for i, ass in enumerate(ass_lbls):
+                    if ass_colors[i] and ass not in str_ass:
+                        ass_colors[i] = not ass_colors[i]
 
                 del self.conflict[0]
 
