@@ -20,38 +20,38 @@ class MyGame(arcade.View):
     def __init__(self):
         super().__init__()
         arcade.set_background_color(arcade.color.WHITE)
-        self.texture_list = None
-        self.floor = 1
+
+        self.texture_list = create_scene.create_not_collidable()
         self.wall_lists = [create_scene.create_collidable(
             SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT, floor) for floor in range(1, 4)]
+        self.wall_list = self.wall_lists[0]
+
+        self.floor = 1
         self.robot_sprite = arcade.Sprite("resources/robottino.png")
         self.robot_sprite.center_x, self.robot_sprite.center_y = 128, 32
         self.robot = Agent(self.wall_lists, 'kb',
                            self.robot_sprite, self.floor)
-        self.wall_list = self.wall_lists[0]
+
+        self.ass_lbls = [str(ass) for ass in self.robot.engine.ass]
+        self.ass_colors = [True for i in range(len(self.ass_lbls))]
+        self.ass_index = 0
+        self.messages_index = 0
+        self.messages = []
+
         self.timer = .1
         self.ui_manager = UIManager()
         self.ui_input_box = gui.QueryBox()
         self.ui_manager.add_ui_element(self.ui_input_box)
-        self.messages = []
         self.button = gui.OkButton(self.ui_input_box, self.messages)
         self.ui_manager.add_ui_element(self.button)
-        self.texture_list = create_scene.create_not_collidable()
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.robot_sprite,
                                                          self.wall_list)
-        self.lblList = []
-        self.messages_index = 0
-
-        for p, text in enumerate(self.robot.engine.ass):
-            comandLabel = gui.ComandLabel(str(text), p)
-            self.ui_manager.add_ui_element(comandLabel)
-            self.lblList.append(comandLabel)
-        self.robot.lblList = self.lblList
 
     def on_update(self, delta_time):
         self.update_position(delta_time)
-        self.robot.update_path(delta_time)
+        self.robot.update_path(delta_time,
+                               self.ass_lbls, self.ass_colors)
         self.update_ui()
         self.update_assumables()
         self.physics_engine.update()
@@ -61,18 +61,41 @@ class MyGame(arcade.View):
         self.wall_list.draw()
         self.texture_list.draw()
         self.robot_sprite.draw()
+        self.draw_messages()
+        self.draw_ass_lbls()
+
+    def draw_messages(self):
         for i, elem in enumerate(self.messages[self.messages_index:]):
-            if i > 16:
+            if i >= 14:
                 break
             arcade.draw_text(
-                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-20*i, arcade.color.BLACK)
+                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-24*i, arcade.color.BLACK, font_size=16)
+
+    def draw_ass_lbls(self):
+        for i, elem in enumerate(self.ass_lbls[self.ass_index:]):
+            if i >= 16:
+                break
+            color = arcade.color.GREEN if self.ass_colors[self.ass_index +
+                                                          i] else arcade.color.RED
+            arcade.draw_text(
+                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT-40)-24*i, color, font_size=16)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        # aggiungere parte per scroll solo in riquadro basso a dx
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             updated_index = self.messages_index + int(scroll_y)
             if updated_index >= 0 and updated_index < len(self.messages):
                 self.messages_index = updated_index
+
+        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y < SCREEN_HEIGHT and y > SCREEN_HEIGHT/2:
+            updated_index = self.ass_index + int(scroll_y)
+            if updated_index >= 0 and updated_index < len(self.ass_lbls):
+                self.ass_index = updated_index
+
+    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
+        index = -(y//24-32)
+        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.ass_colors[self.ass_index:]):
+            self.ass_colors[self.ass_index +
+                            index] = not self.ass_colors[self.ass_index+index]
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:
@@ -102,14 +125,14 @@ class MyGame(arcade.View):
             self.robot.message = []
 
     def update_assumables(self):
-
         str_ass = [str(ass) for ass in self.robot.engine.ass]
-        for ass in self.lblList:
-            parsed = parse(ass.text+'.')[0]
-            if not ass.click and str(parsed) not in str_ass:
+        for i, ass in enumerate(self.ass_lbls):
+            parsed = parse(ass+'.')[0]
+            color = self.ass_colors[i]
+            if color and str(parsed) not in str_ass:
                 self.robot.engine.kb.append(Clause(parsed))
                 self.robot.engine.ass.append(parsed)
-            elif ass.click and str(parsed) in str_ass:
+            elif not color and str(parsed) in str_ass:
                 del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
                 del self.robot.engine.kb[self.robot.engine.kb.index(
                     Clause(parsed))]
