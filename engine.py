@@ -135,6 +135,8 @@ class Engine(object):
 
     def __init__(self) -> None:
         self.kb = []
+        self.built_in_funcs = built_in_funcs
+        self.built_in_preds = built_in_preds
 
     """
     Carica la kb da filename
@@ -263,6 +265,8 @@ class Engine(object):
         SLD_derivations = []
         closed_list = []
         frontier = [[self.__get_gac(query)]]
+        if len(frontier[0][0].head.args) == 0:
+            prove_one = True
 
         while len(frontier) != 0:
             path = frontier[-1]
@@ -275,7 +279,7 @@ class Engine(object):
                 if path not in SLD_derivations:
                     if prove_one:
                         reset_vars()
-                        return path
+                        return [path]
                     SLD_derivations.append(path)
                     continue
             neighbours = derive(path[-1], abduce, occurs_check)

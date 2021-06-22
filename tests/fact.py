@@ -12,6 +12,8 @@ n = 1
 while True:
     query = e.parse('factorial('+str(n)+',1,F).')
     print('query: '+str(query))
-    for a in en.prove(query):
-        print(a[-1])
+    a = en.prove(query,prove_one=True)
+    
+    print(a)
+    input()
     n+=1

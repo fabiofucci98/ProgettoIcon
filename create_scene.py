@@ -23,7 +23,7 @@ def create_collidable_ground(screen_width_room, screen_height_room, screen_width
     walls.extend(create_kitchen(screen_height_room))
     walls.extend(create_double_room_ground(screen_height))
     walls.extend(create_library(screen_height_room))
-    
+
     return walls
 
 
@@ -36,7 +36,6 @@ def create_collidable_up(screen_width_room, screen_height_room, screen_width, sc
     walls.extend(create_serra(screen_height_room))
     walls.extend(create_bedroom())
     walls.extend(create_double_room_up(screen_height_room))
-    
 
     return walls
 
@@ -48,7 +47,7 @@ def create_collidable_down(screen_width_room, screen_height_room, screen_width, 
     walls.extend(create_outer_walls(screen_width_room,
                                     screen_height_room, screen_width, screen_height_room))
     walls.extend(create_garage())
-   
+
     return walls
 
 
@@ -146,16 +145,16 @@ def create_lab(screen_height):
         sprite.center_x = SPRITE_SIZE*i+24
         sprite.center_y = (20*SPRITE_SIZE)+8
         wall_list.append(sprite)
-    #TEXTURE
+    # TEXTURE
     texture = arcade.Sprite(
         "resources/ObjSprite/Ground/scrivania_lab.png")
     texture.center_x = 48
     texture.center_y = 720
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=20
-    texture.center_y=480
-    texture.angle=90
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 20
+    texture.center_y = 480
+    texture.angle = 90
     wall_list.append(texture)
     return wall_list
 
@@ -184,17 +183,17 @@ def create_bath():
         sprite.center_x = SPRITE_SIZE*i+24
         sprite.center_y = 14*SPRITE_SIZE+8
         wall_list.append(sprite)
-    
-    #TEXTURE
-    texture=arcade.Sprite("resources/ObjSprite/Ground/bagno.png",1.5)
-    texture.center_x=40
-    texture.center_y=112
-    texture.angle=180
+
+    # TEXTURE
+    texture = arcade.Sprite("resources/ObjSprite/Ground/bagno.png", 1.5)
+    texture.center_x = 40
+    texture.center_y = 112
+    texture.angle = 180
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=250
-    texture.center_y=128
-    texture.angle=-90
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 250
+    texture.center_y = 128
+    texture.angle = -90
     wall_list.append(texture)
     return wall_list
 
@@ -218,7 +217,7 @@ def create_kitchen(screen_height):
         sprite.center_x = screen_height-SPRITE_SIZE*i-24
         sprite.center_y = 11*SPRITE_SIZE+8
         wall_list.append(sprite)
-    #TEXTURE
+    # TEXTURE
     texture = arcade.Sprite("resources/ObjSprite/Ground/cucina1.png")
     texture.center_x = 768
     texture.center_y = 96
@@ -228,10 +227,10 @@ def create_kitchen(screen_height):
     texture.center_x = 632
     texture.center_y = 32
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=592
-    texture.center_y=170
-    texture.angle=0
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 592
+    texture.center_y = 170
+    texture.angle = 0
     wall_list.append(texture)
     return wall_list
 
@@ -278,23 +277,23 @@ def create_double_room_ground(screen_height):
         sprite.center_x = screen_height-SPRITE_SIZE*i-24
         sprite.center_y = 28*SPRITE_SIZE+8
         wall_list.append(sprite)
-    #TEXTURE
-    texture=arcade.Sprite("resources/ObjSprite/Ground/armadietti.png")
-    texture.center_x=768
-    texture.center_y=360
+    # TEXTURE
+    texture = arcade.Sprite("resources/ObjSprite/Ground/armadietti.png")
+    texture.center_x = 768
+    texture.center_y = 360
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/ObjSprite/Ground/armadietti.png")
-    texture.center_x=608
-    texture.center_y=360
-    texture.angle=180
+    texture = arcade.Sprite("resources/ObjSprite/Ground/armadietti.png")
+    texture.center_x = 608
+    texture.center_y = 360
+    texture.angle = 180
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/ObjSprite/Ground/meccanica.png")
-    texture.center_x=560
-    texture.center_y=360
+    texture = arcade.Sprite("resources/ObjSprite/Ground/meccanica.png")
+    texture.center_x = 560
+    texture.center_y = 360
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/ObjSprite/Ground/meccanica.png")
-    texture.center_x=400
-    texture.center_y=360
+    texture = arcade.Sprite("resources/ObjSprite/Ground/meccanica.png")
+    texture.center_x = 400
+    texture.center_y = 360
     wall_list.append(texture)
     return wall_list
 
@@ -324,23 +323,23 @@ def create_library(screen_height):
         sprite.center_x = screen_height-SPRITE_SIZE*i-24
         sprite.center_y = screen_height-16*SPRITE_SIZE+8
         wall_list.append(sprite)
-        
-    #TEXTURE
+
+    # TEXTURE
     texture = arcade.Sprite(
         "resources/ObjSprite/Ground/lib1.png")
     texture.center_x = 768
     texture.center_y = 672
     wall_list.append(texture)
-    
+
     texture = arcade.Sprite(
         "resources/ObjSprite/Ground/lib2.png")
     texture.center_x = 576
     texture.center_y = 576
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=560
-    texture.center_y=778
-    texture.angle=0
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 560
+    texture.center_y = 778
+    texture.angle = 0
     wall_list.append(texture)
     return wall_list
 
@@ -370,7 +369,7 @@ def create_serra(screen_height):
         sprite.center_x = SPRITE_SIZE*i+8
         sprite.center_y = screen_height-16*SPRITE_SIZE+8
         wall_list.append(sprite)
-    #TEXTURE
+    # TEXTURE
     for i in range(0, 10):
         texture = arcade.Sprite(
             "resources/ObjSprite/Up/pianta1.png", 1)
@@ -389,10 +388,10 @@ def create_serra(screen_height):
         texture.center_x = 80*i+40
         texture.center_y = 624
         wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=384
-    texture.center_y=778
-    texture.angle=0
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 384
+    texture.center_y = 778
+    texture.angle = 0
     wall_list.append(texture)
     return wall_list
 
@@ -423,20 +422,20 @@ def create_bedroom():
         sprite.center_y = SPRITE_SIZE*i+8
         wall_list.append(sprite)
 
-    #TEXTURE
+    # TEXTURE
     texture = arcade.Sprite("resources/ObjSprite/Up/lettocasa.png")
-    texture.center_x=128
-    texture.center_y=56
-    texture.angle=180
+    texture.center_x = 128
+    texture.center_y = 56
+    texture.angle = 180
     wall_list.append(texture)
     texture = arcade.Sprite("resources/ObjSprite/Up/lib1.png")
-    texture.center_x=240
-    texture.center_y=160
+    texture.center_x = 240
+    texture.center_y = 160
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=20
-    texture.center_y=160
-    texture.angle=90
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 20
+    texture.center_y = 160
+    texture.angle = 90
     wall_list.append(texture)
     return wall_list
 
@@ -477,17 +476,18 @@ def create_double_room_up(screen_height):
         sprite.center_x = screen_height-27*SPRITE_SIZE+8
         sprite.center_y = SPRITE_SIZE*i+8
         wall_list.append(sprite)
-    
-    #SPRITE
-    texture = arcade.Sprite("resources/ObjSprite/Up/bagno.png",1.5)
-    texture.center_x=464
-    texture.center_y=40
-    texture.angle=-90
+
+    # SPRITE
+    texture = arcade.Sprite("resources/ObjSprite/Up/bagno.png", 1.5)
+    texture.center_x = 464
+    texture.center_y = 40
+    texture.angle = -90
     wall_list.append(texture)
 
     return wall_list
 
-#Down Scene
+# Down Scene
+
 
 def create_garage():
     wall_list = arcade.SpriteList(is_static=True)
@@ -508,10 +508,10 @@ def create_garage():
     texture.center_x = 400
     texture.center_y = 400
     wall_list.append(texture)
-    texture=arcade.Sprite("resources/light.png")
-    texture.center_x=416
-    texture.center_y=778
-    texture.angle=0
+    texture = arcade.Sprite("resources/light.png")
+    texture.center_x = 416
+    texture.center_y = 778
+    texture.angle = 0
     wall_list.append(texture)
     return wall_list
 
