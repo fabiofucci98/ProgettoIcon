@@ -53,14 +53,13 @@ def create_collidable_down(screen_width_room, screen_height_room, screen_width, 
 
 def create_not_collidable():
     texture = arcade.SpriteList(is_static=True)
-
     texture.extend(create_stair())
     texture.extend(create_lift())
 
     return texture
 
-# Posizionamento dei muri
 
+# Posizionamento dei muri
 
 def create_outer_walls(screen_width_room, screen_height_room, screen_width, screen_height):
     SPRITE_SIZE = 16
@@ -108,7 +107,6 @@ def create_outer_walls(screen_width_room, screen_height_room, screen_width, scre
         wall_list.append(sprite)
 
     # muro division interfaccia
-    # muro superiore
     for i in range(int(screen_width_room/SPRITE_SIZE), int(screen_width/SPRITE_SIZE)):
         sprite = arcade.Sprite(
             WALL_RESOURCE)
@@ -118,8 +116,8 @@ def create_outer_walls(screen_width_room, screen_height_room, screen_width, scre
 
     return wall_list
 
-# Ground Scene
 
+# Ground Scene
 
 def create_lab(screen_height):
     SPRITE_SIZE = 16
@@ -369,30 +367,33 @@ def create_serra(screen_height):
         sprite.center_x = SPRITE_SIZE*i+8
         sprite.center_y = screen_height-16*SPRITE_SIZE+8
         wall_list.append(sprite)
+
     # TEXTURE
-    for i in range(0, 10):
+    
+    for i in range(1, 9):
         texture = arcade.Sprite(
-            "resources/ObjSprite/Up/pianta1.png", 1)
-        texture.center_x = 80*i+40
-        texture.center_y = 752
+            "resources/ObjSprite/Up/pianta3.png", 1.5)
+        texture.center_x = 90*i
+        texture.center_y = 720
         wall_list.append(texture)
-    for i in range(0, 10):
+    for i in range(1, 9):
         texture = arcade.Sprite(
-            "resources/ObjSprite/Up/pianta3.png", 1)
-        texture.center_x = 80*i+40
-        texture.center_y = 688
-        wall_list.append(texture)
-    for i in range(0, 10):
-        texture = arcade.Sprite(
-            "resources/ObjSprite/Up/pianta2.png", 1)
-        texture.center_x = 80*i+40
-        texture.center_y = 624
+            "resources/ObjSprite/Up/pianta2.png", 1.5)
+        texture.center_x = 90*i
+        texture.center_y = 632
         wall_list.append(texture)
     texture = arcade.Sprite("resources/light.png")
     texture.center_x = 384
     texture.center_y = 778
     texture.angle = 0
     wall_list.append(texture)
+    #commenta questo pezzo di codice se vuoi usare la funzione create_pipe()
+    texture = arcade.Sprite(
+        "resources/ObjSprite/Up/pipe.png")
+    texture.center_x = 354
+    texture.center_y = 680
+    wall_list.append(texture)
+    #fine commento
     return wall_list
 
 
@@ -537,3 +538,17 @@ def create_lift():
     texture.center_y = 54
     texture_list.append(texture)
     return texture_list
+
+
+"""in caso ti serva una funzione a parte per non collidable
+
+def create_pipe():
+    texture_list = arcade.SpriteList(is_static=True)
+    texture = arcade.Sprite(
+        "resources/ObjSprite/Up/pipe.png")
+    texture.center_x = 354
+    texture.center_y = 680
+    texture_list.append(texture)
+    return texture_list
+    
+    commenta il pezzo evidenziato in create_serra()"""
