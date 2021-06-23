@@ -96,7 +96,8 @@ class MyGame(arcade.View):
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.ass_colors[self.ass_index:]):
             self.ass_colors[self.ass_index +
                             index] = not self.ass_colors[self.ass_index+index]
-        
+        """x, y = x-x % 16, y-y % 16
+        print(x,y)"""
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ENTER:
