@@ -58,9 +58,6 @@ posizione(pn8,656,640,2).
 up(s1).
 up(s2).
 up(s3).
-dark(l1).
-dark(l2).
-
 
 
 light(l1).

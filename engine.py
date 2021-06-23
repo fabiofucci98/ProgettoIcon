@@ -146,6 +146,7 @@ class Engine(object):
         f = open(filename, 'r')
         kb = []
         ass = []
+        empty_body_clauses = []
         ass_flag = False
         for line in f:
             if line[-1] == '\n':
@@ -159,8 +160,10 @@ class Engine(object):
 
             preds = parse(line)
             if preds:
-                kb.append(Clause(preds[0], preds[1:]))
-
+                clause = Clause(preds[0], preds[1:])
+                kb.append(clause)
+                if len(preds[1:]) == 0:
+                    empty_body_clauses.append(clause)
             if ass_flag and len(preds) == 1:
                 ass.append(preds[0])
             elif ass_flag and len(preds) > 1:
@@ -168,6 +171,7 @@ class Engine(object):
 
         self.kb = kb
         self.ass = ass
+        self.__empty_body_clauses = empty_body_clauses
 
     """
     Genera le derivazioni SLD ottenute a partire da query
@@ -262,14 +266,33 @@ class Engine(object):
 
             return True
 
+        def simplify(gac, abduce):
+            tmp_gac = deepcopy(gac)
+            for atom in tmp_gac.body:
+                if abduce and atom in self.ass:
+                    continue
+                if atom.contains_vars():
+                    continue
+                idx = tmp_gac.body.index(atom)
+                for clause in self.__empty_body_clauses:
+                    renamed_clause = self.__rename_vars(
+                        deepcopy(clause))
+                    sub = self.__unify(
+                        renamed_clause.head, atom, occurs_check)
+                    if isinstance(sub, list):
+                        del tmp_gac.body[idx]
+                        break
+            return tmp_gac
+
         SLD_derivations = []
         closed_list = []
         frontier = [[self.__get_gac(query)]]
-        if len(frontier[0][0].head.args) == 0:
-            prove_one = True
 
         while len(frontier) != 0:
             path = frontier[-1]
+            simp = simplify(path[-1], abduce)
+            if simp != path[-1]:
+                path.append(simp)
             del frontier[-1]
             if path[-1] in closed_list:
                 continue
@@ -407,35 +430,24 @@ class Engine(object):
         gac.head.args = flat_list
         return gac
 
-    def how(self, query: list, occurs_check=True):
-        def find_rule(gac, der, occurs_check):
-            flag = False
-            for atom in gac.body:
-                idx = gac.body.index(atom)
-                if not atom.negated:
-                    for clause in self.kb:
-                        renamed_clause = self.__rename_vars(deepcopy(clause))
-                        sub = self.__unify(
-                            renamed_clause.head, atom, occurs_check)
-                        if isinstance(sub, list):
-                            tmp_gac = deepcopy(gac)
-                            del tmp_gac.body[idx]
-                            tmp_gac.body[idx:idx] = renamed_clause.body
-                            if der == self.__substitute(tmp_gac, sub):
-                                return clause
-                else:
-                    flag = True
-            if flag:
-                return 'naf'
-
-        SLD_ders = self.prove(query, occurs_check=occurs_check)
-        if not SLD_ders:
-            return None
-        dir_ders = []
+    def how(self, atom: Predicate, occurs_check=True):
+        if atom.negated:
+            return 'naf'
+        rules = []
+        SLD_ders = self.prove([atom], occurs_check=occurs_check)
         for der in SLD_ders:
-            if der[1] not in dir_ders:
-                dir_ders.append(der[1])
-        return [find_rule(self.__get_gac(query), der, occurs_check) for der in dir_ders]
+            for clause in self.kb:
+                renamed_clause = self.__rename_vars(deepcopy(clause))
+                sub = self.__unify(
+                    renamed_clause.head, atom, occurs_check)
+                if isinstance(sub, list):
+                    tmp_gac = deepcopy(der[0])
+                    del tmp_gac.body[0]
+                    tmp_gac.body[0:0] = renamed_clause.body
+                    if der[1] == self.__substitute(tmp_gac, sub) and clause not in rules:
+                        rules.append(clause)
+
+        return rules
 
     def __str__(self):
         s = 'KB\n'

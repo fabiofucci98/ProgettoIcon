@@ -32,8 +32,12 @@ class MyGame(arcade.View):
         self.robot = Agent(self.wall_lists, 'kb',
                            self.robot_sprite, self.floor)
 
-        self.ass_lbls = [str(ass) for ass in self.robot.engine.ass]
-        self.ass_colors = [True for i in range(len(self.ass_lbls))]
+        self.observations = ['dark(l1)',
+                             'dark(l2)']
+        self.assumables = [str(ass) for ass in self.robot.engine.ass]
+        self.ass_colors = [True for i in range(len(self.assumables))]
+        self.obs_colors = [False for i in range(len(self.observations))]
+        self.obs_index = 0
         self.ass_index = 0
         self.messages_index = 0
         self.messages = []
@@ -51,9 +55,10 @@ class MyGame(arcade.View):
     def on_update(self, delta_time):
         self.update_position(delta_time)
         self.robot.update_path(delta_time,
-                               self.ass_lbls, self.ass_colors)
+                               self.assumables, self.ass_colors)
         self.update_ui()
         self.update_assumables()
+        self.update_observations()
         self.physics_engine.update()
 
     def on_draw(self):
@@ -62,7 +67,17 @@ class MyGame(arcade.View):
         self.texture_list.draw()
         self.robot_sprite.draw()
         self.draw_messages()
-        self.draw_ass_lbls()
+        self.draw_observations()
+        self.draw_assumables()
+        arcade.draw_text(
+            'Assumables:', SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT-40), arcade.color.BLACK, font_size=16)
+        line_x_pos = SCREEN_WIDTH_ROOM+(SCREEN_WIDTH-SCREEN_WIDTH_ROOM)/2-8
+        line_y = SCREEN_HEIGHT-16
+        arcade.draw_line(line_x_pos, line_y,
+                         line_x_pos, line_y-384, arcade.color.BLACK)
+
+        arcade.draw_text(
+            'Observations:', line_x_pos+8, (SCREEN_HEIGHT-40), arcade.color.BLACK, font_size=16)
 
     def draw_messages(self):
         for i, elem in enumerate(self.messages[self.messages_index:]):
@@ -71,31 +86,53 @@ class MyGame(arcade.View):
             arcade.draw_text(
                 elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT/2-40)-24*i, arcade.color.BLACK, font_size=16)
 
-    def draw_ass_lbls(self):
-        for i, elem in enumerate(self.ass_lbls[self.ass_index:]):
-            if i >= 16:
+    def draw_observations(self):
+        for i, elem in enumerate(self.observations[self.obs_index:]):
+            if i >= 15:
+                break
+            color = arcade.color.GREEN if self.obs_colors[self.obs_index +
+                                                          i] else arcade.color.RED
+            arcade.draw_text(
+                elem,  SCREEN_WIDTH_ROOM+(SCREEN_WIDTH-SCREEN_WIDTH_ROOM)/2, (SCREEN_HEIGHT-60)-24*i, color, font_size=16)
+
+    def draw_assumables(self):
+        for i, elem in enumerate(self.assumables[self.ass_index:]):
+            if i >= 15:
                 break
             color = arcade.color.GREEN if self.ass_colors[self.ass_index +
                                                           i] else arcade.color.RED
             arcade.draw_text(
-                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT-40)-24*i, color, font_size=16)
+                elem, SCREEN_WIDTH_ROOM+8, (SCREEN_HEIGHT-60)-24*i, color, font_size=16)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y > 3*SPRITE_SIZE and y < SCREEN_HEIGHT/2:
             updated_index = self.messages_index + int(scroll_y)
             if updated_index >= 0 and updated_index < len(self.messages):
                 self.messages_index = updated_index
+        line_x_pos = SCREEN_WIDTH_ROOM+(SCREEN_WIDTH-SCREEN_WIDTH_ROOM)/2-8
 
-        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y < SCREEN_HEIGHT and y > SCREEN_HEIGHT/2:
+        if x > SCREEN_WIDTH_ROOM and x < line_x_pos and y < SCREEN_HEIGHT and y > SCREEN_HEIGHT/2:
             updated_index = self.ass_index + int(scroll_y)
-            if updated_index >= 0 and updated_index < len(self.ass_lbls):
+            if updated_index >= 0 and updated_index < len(self.assumables):
                 self.ass_index = updated_index
 
+        if x > line_x_pos and x < SCREEN_WIDTH and y < SCREEN_HEIGHT and y > SCREEN_HEIGHT/2:
+            updated_index = self.obs_index + int(scroll_y)
+            if updated_index >= 0 and updated_index < len(self.observations):
+                self.obs_index = updated_index
+
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        index = -(y//24-32)
-        if x > SCREEN_WIDTH_ROOM and x < SCREEN_WIDTH and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.ass_colors[self.ass_index:]):
+        index = -(y//24-31)
+        line_x_pos = SCREEN_WIDTH_ROOM+(SCREEN_WIDTH-SCREEN_WIDTH_ROOM)/2-8
+
+        if x > SCREEN_WIDTH_ROOM and x < line_x_pos and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.ass_colors[self.ass_index:]):
             self.ass_colors[self.ass_index +
                             index] = not self.ass_colors[self.ass_index+index]
+
+
+        if x > line_x_pos and x < SCREEN_WIDTH and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.obs_colors[self.obs_index:]):
+            self.obs_colors[self.obs_index +
+                            index] = not self.obs_colors[self.obs_index+index]
         """x, y = x-x % 16, y-y % 16
         print(x,y)"""
 
@@ -128,16 +165,28 @@ class MyGame(arcade.View):
 
     def update_assumables(self):
         str_ass = [str(ass) for ass in self.robot.engine.ass]
-        for i, ass in enumerate(self.ass_lbls):
+        for i, ass in enumerate(self.assumables):
             parsed = parse(ass+'.')[0]
             color = self.ass_colors[i]
             if color and str(parsed) not in str_ass:
                 self.robot.engine.kb.append(Clause(parsed))
                 self.robot.engine.ass.append(parsed)
             elif not color and str(parsed) in str_ass:
-                del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
                 del self.robot.engine.kb[self.robot.engine.kb.index(
                     Clause(parsed))]
+                del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
+
+    def update_observations(self):
+        str_obs = [str(obs) for obs in self.robot.engine.kb]
+        for i, obs in enumerate(self.observations):
+            clause = Clause(parse(obs+'.')[0])
+            color = self.obs_colors[i]
+            if color and str(clause) not in str_obs:
+                self.robot.engine.kb.append(clause)
+
+            elif not color and str(clause) in str_obs:
+                del self.robot.engine.kb[self.robot.engine.kb.index(
+                    clause)]
 
     def change_floor(self, floor):
         self.floor = floor

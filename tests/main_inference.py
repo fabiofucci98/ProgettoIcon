@@ -31,19 +31,20 @@ query = 'not_pp(d).'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 # Primo esempio con un albero di derivazione più profondo
 query = 'a,d.'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
+print(engine.how(query[1]))
 # Esempio con individui e regole
 query = 'rotto(X).'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 # Semplice derivazione con individui
 query = 'imm_west(X,Y).'
@@ -51,35 +52,35 @@ query = 'imm_west(X,Y).'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 # Derivazioni con naf
 query = 'a1.'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 
 query = 'not_a1.'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 # Derivazione con naf e predicati
 query = 'p(X).'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 # Cicli
 query = 'a2.'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
-print(engine.how(query))
+print(engine.how(query[0]))
 
 query = e.parse(input())
 while(True):
