@@ -14,6 +14,6 @@ while True:
     print('query: '+str(query))
     a = en.prove(query,prove_one=True)
     
-    print(a)
+    print(a[-1][-1])
     input()
     n+=1

@@ -135,6 +135,8 @@ class Engine(object):
 
     def __init__(self) -> None:
         self.kb = []
+        self.ass = []
+        self.empty_body_clauses = []
         self.built_in_funcs = built_in_funcs
         self.built_in_preds = built_in_preds
 
@@ -171,7 +173,7 @@ class Engine(object):
 
         self.kb = kb
         self.ass = ass
-        self.__empty_body_clauses = empty_body_clauses
+        self.empty_body_clauses = empty_body_clauses
 
     """
     Genera le derivazioni SLD ottenute a partire da query
@@ -274,7 +276,7 @@ class Engine(object):
                 if atom.contains_vars():
                     continue
                 idx = tmp_gac.body.index(atom)
-                for clause in self.__empty_body_clauses:
+                for clause in self.empty_body_clauses:
                     renamed_clause = self.__rename_vars(
                         deepcopy(clause))
                     sub = self.__unify(
