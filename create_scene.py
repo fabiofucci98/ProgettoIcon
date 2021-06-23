@@ -12,6 +12,15 @@ def create_collidable(screen_width_room, screen_height_room, screen_width, scree
         return create_collidable_down(screen_width_room, screen_height_room, screen_width, screen_height)
 
 
+def create_not_collidable(floor):
+    texture = arcade.SpriteList(is_static=True)
+    texture.extend(create_stair())
+    texture.extend(create_lift())
+    if floor == 2:
+        texture.extend(create_pipe())
+    return texture
+
+
 def create_collidable_ground(screen_width_room, screen_height_room, screen_width, screen_height):
     walls = arcade.SpriteList(
         use_spatial_hash=True, spatial_hash_cell_size=128)
@@ -49,14 +58,6 @@ def create_collidable_down(screen_width_room, screen_height_room, screen_width, 
     walls.extend(create_garage())
 
     return walls
-
-
-def create_not_collidable():
-    texture = arcade.SpriteList(is_static=True)
-    texture.extend(create_stair())
-    texture.extend(create_lift())
-
-    return texture
 
 
 # Posizionamento dei muri
@@ -369,7 +370,7 @@ def create_serra(screen_height):
         wall_list.append(sprite)
 
     # TEXTURE
-    
+
     for i in range(1, 9):
         texture = arcade.Sprite(
             "resources/ObjSprite/Up/pianta3.png", 1.5)
@@ -387,13 +388,7 @@ def create_serra(screen_height):
     texture.center_y = 778
     texture.angle = 0
     wall_list.append(texture)
-    #commenta questo pezzo di codice se vuoi usare la funzione create_pipe()
-    texture = arcade.Sprite(
-        "resources/ObjSprite/Up/pipe.png")
-    texture.center_x = 354
-    texture.center_y = 680
-    wall_list.append(texture)
-    #fine commento
+
     return wall_list
 
 
@@ -540,8 +535,6 @@ def create_lift():
     return texture_list
 
 
-"""in caso ti serva una funzione a parte per non collidable
-
 def create_pipe():
     texture_list = arcade.SpriteList(is_static=True)
     texture = arcade.Sprite(
@@ -550,5 +543,3 @@ def create_pipe():
     texture.center_y = 680
     texture_list.append(texture)
     return texture_list
-    
-    commenta il pezzo evidenziato in create_serra()"""

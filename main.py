@@ -21,7 +21,7 @@ class MyGame(arcade.View):
         super().__init__()
         arcade.set_background_color(arcade.color.WHITE)
 
-        self.texture_list = create_scene.create_not_collidable()
+        self.texture_list = create_scene.create_not_collidable(floor=1)
         self.wall_lists = [create_scene.create_collidable(
             SCREEN_WIDTH_ROOM, SCREEN_HEIGHT_ROOM, SCREEN_WIDTH, SCREEN_HEIGHT, floor) for floor in range(1, 4)]
         self.wall_list = self.wall_lists[0]
@@ -129,7 +129,6 @@ class MyGame(arcade.View):
             self.ass_colors[self.ass_index +
                             index] = not self.ass_colors[self.ass_index+index]
 
-
         if x > line_x_pos and x < SCREEN_WIDTH and y < SCREEN_HEIGHT-16 and y > SCREEN_HEIGHT/2 and index < len(self.obs_colors[self.obs_index:]):
             self.obs_colors[self.obs_index +
                             index] = not self.obs_colors[self.obs_index+index]
@@ -194,6 +193,7 @@ class MyGame(arcade.View):
     def change_floor(self, floor):
         self.floor = floor
         self.wall_list = self.wall_lists[floor-1]
+        self.texture_list = create_scene.create_not_collidable(floor)
         self.physics_engine.walls = self.wall_list
         self.robot.floor = floor
         self.robot.floor_to_go = None
