@@ -171,10 +171,13 @@ class MyGame(arcade.View):
             if color and str(parsed) not in str_ass:
                 self.robot.engine.kb.append(Clause(parsed))
                 self.robot.engine.ass.append(parsed)
+                self.robot.engine.empty_body_clauses.append(Clause(parsed))
             elif not color and str(parsed) in str_ass:
                 del self.robot.engine.kb[self.robot.engine.kb.index(
                     Clause(parsed))]
                 del self.robot.engine.ass[self.robot.engine.ass.index(parsed)]
+                del self.robot.engine.empty_body_clauses[self.robot.engine.empty_body_clauses.index(
+                    Clause(parsed))]
 
     def update_observations(self):
         str_obs = [str(obs) for obs in self.robot.engine.kb]

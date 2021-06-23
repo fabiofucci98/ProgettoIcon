@@ -28,7 +28,7 @@ class Agent:
         self.message = []
         self.pos_ind_dict = None
 
-    def act(self, text):
+    def act(self, text: str):
         if text == 'abduce':
             self.options['abduce'] = not self.options['abduce']
             self.message.extend(['abduce = '+str(self.options['abduce'])])
@@ -42,6 +42,13 @@ class Agent:
                 ['occurs check = '+str(self.options['abduce'])])
         elif text == 'solve_conflicts':
             self.solve_conflicts()
+        elif text.split()[0] == 'how' and len(text.split()) == 2:
+            rules = self.engine.how(
+                parse(text.split()[1]+'.')[0], self.options['occurs'])
+            messages = [str(clause)
+                        for clause in rules] if len(rules) > 0 else ['None']
+            self.message.extend(
+                messages)
         else:
             try:
                 query = parse(text)
@@ -125,10 +132,11 @@ class Agent:
 
         ans = clean(self.engine.prove(
             parse('false.'), abduce=True), abduce=True)
-        conflict = min_conflict(ans)
-        if len(conflict) == 0:
+        if len(ans) == 1 and ans[0] == 'False':
             self.message.extend(['Non ci sono conflitti da risolvere'])
             return
+        conflict = min_conflict(ans)
+
         self.message.extend(
             ['Ho trovato i seguenti conflitti']+[str(elem) for elem in ans]+[''])
         self.message.extend(['Risolverò']+[str(conflict)]+[''])
@@ -166,6 +174,8 @@ class Agent:
                 del self.engine.kb[self.engine.kb.index(
                     Clause(self.conflict[0]))]
                 del self.engine.ass[self.engine.ass.index(self.conflict[0])]
+                del self.engine.empty_body_clauses[self.engine.empty_body_clauses.index(
+                    Clause(self.conflict[0]))]
 
                 str_ass = [str(ass) for ass in self.engine.ass]
                 for i, ass in enumerate(ass_lbls):
