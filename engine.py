@@ -145,6 +145,7 @@ class Engine(object):
     """
 
     def load_kb(self, filename):
+
         f = open(filename, 'r')
         kb = []
         ass = []

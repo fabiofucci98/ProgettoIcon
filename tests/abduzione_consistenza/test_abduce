@@ -1,0 +1,16 @@
+bronchitis : influenza.
+bronchitis : smokes.
+coughing : bronchitis.
+wheezing : bronchitis.
+fever : influenza.
+fever : infection.
+sore_throat : influenza.
+false : smokes, nonsmoker.
+
+
+
+ass:
+smokes.
+nonsmoker.
+influenza.
+infection.

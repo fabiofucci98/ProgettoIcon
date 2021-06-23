@@ -5,11 +5,6 @@ from math import inf
 ELEVATOR_POS = 320, 48
 STAIRS_POS = 720, 496
 
-"""
-class QueryException(Exception):
-    pass
-"""
-
 
 class Agent:
     def __init__(self, wall_lists, kb_filename, sprite, floor):
