@@ -152,8 +152,7 @@ class Engine(object):
         empty_body_clauses = []
         ass_flag = False
         for line in f:
-            if line[-1] == '\n':
-                line = line[0:-1]
+            line = line.strip()
             if line == '':
                 continue
 
@@ -288,7 +287,6 @@ class Engine(object):
             return tmp_gac
 
         SLD_derivations = []
-        closed_list = []
         frontier = [[self.__get_gac(query)]]
 
         while len(frontier) != 0:
@@ -297,10 +295,6 @@ class Engine(object):
             if simp != path[-1]:
                 path.append(simp)
             del frontier[-1]
-            if path[-1] in closed_list:
-                continue
-            else:
-                closed_list.append(path[-1])
             if (len(path[-1].body) == 0 and not abduce) or (abduce and abduce_criterion(path[-1])):
                 if path not in SLD_derivations:
                     if prove_one:
@@ -310,6 +304,8 @@ class Engine(object):
                     continue
             neighbours = derive(path[-1], abduce, occurs_check)
             for edge in neighbours:
+                if edge in path:
+                    continue
                 new_path = path.copy()
                 new_path.append(edge)
                 frontier.append(new_path)
@@ -342,7 +338,6 @@ class Engine(object):
                 return term
 
         to_sub = [sub[0] for sub in subs]
-        # clause = deepcopy(clause)
         for i in range(len(clause.head.args)):
             clause.head.args[i] = rec_sub(clause.head.args[i], to_sub, subs)
 
@@ -367,13 +362,13 @@ class Engine(object):
         def replace(a, b, eqs, subs):
             def rec_replace(a, b, term):
                 if term == a:
-                    return b
-                elif isinstance(term, Variable):
+                    term = b
+                if isinstance(term, Variable):
                     return term
-                else:
-                    term.args = [rec_replace(
-                        a, b, arg) for arg in term.args]
-                    return term
+
+                term.args = [rec_replace(
+                    a, b, arg) for arg in term.args]
+                return term
             for i in range(len(eqs)):
                 for j in range(len(eqs[i])):
                     eqs[i][j] = rec_replace(a, b, eqs[i][j])

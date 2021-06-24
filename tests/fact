@@ -1,2 +1,0 @@
-factorial(0,F,F).
-factorial(N,A,F) : greater(N,0), factorial(prec(N),mul(N,A),F).

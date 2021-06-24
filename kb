@@ -13,38 +13,13 @@ posizione(garage,320,128,3).
 
 posizione(cb1,112,704,3).
 posizione(cb2,112,656,3).
-posizione(cb3,112,624,3).
 posizione(s1,144,208,1).
 posizione(l1,224,128,1).
 posizione(s2,224,512,1).
 posizione(l2,32,480,1).
 posizione(s3,384,624,1).
-posizione(l3,560,752,1).
-posizione(s4,416,160,1).
-posizione(l4,192,144,1).
-posizione(s5,608,560,2).
-posizione(l5,384,752,2).
-posizione(s6,128,304,2).
-posizione(l6,32,160,2).
-posizione(s7,16,384,3).
-posizione(l7,416,752,3).
 
-posizione(pl1,80,576,2).
-posizione(pl2,176,576,2).
-posizione(pl3,256,576,2).
-posizione(pl4,352,576,2).
-posizione(pl5,448,576,2).
-posizione(pl6,528,576,2).
-posizione(pl7,624,576,2).
-posizione(pl8,720,576,2).
-posizione(pl9,80,752,2).
-posizione(pl10,176,752,2).
-posizione(pl11,256,752,2).
-posizione(pl12,352,752,2).
-posizione(pl13,448,752,2).
-posizione(pl14,528,752,2).
-posizione(pl15,624,752,2).
-posizione(pl16,720,752,2).
+
 posizione(rub,16,640,2).
 posizione(pn1,32,640,2).
 posizione(pn2,112,640,2).
@@ -77,8 +52,29 @@ live(w6) : live(w5), ok(cb2).
 live(w5) : live(outside).
 lit(l1) : light(l1), live(l1), ok(l1).
 lit(l2) : light(l2), live(l2), ok(l2).
-false : dark(l1), lit(l1).
-false : dark(l2), lit(l2).
+
+false : dark(X), lit(X).
+false : arriva_acqua(X), secca(X).
+
+arriva_acqua(pl8): ok_(pn8), arriva_acqua(pn8).
+arriva_acqua(pl7): ok_(pn7), arriva_acqua(pn7).
+arriva_acqua(pl6): ok_(pn6), arriva_acqua(pn6).
+arriva_acqua(pl5): ok_(pn5), arriva_acqua(pn5).
+arriva_acqua(pl4): ok_(pn4), arriva_acqua(pn4).
+arriva_acqua(pl3): ok_(pn3), arriva_acqua(pn3).
+arriva_acqua(pl2): ok_(pn2), arriva_acqua(pn2).
+arriva_acqua(pl1): ok_(pn1), arriva_acqua(pn1).
+
+
+arriva_acqua(pn8): ok_(pn7), arriva_acqua(pn7).
+arriva_acqua(pn7): ok_(pn6), arriva_acqua(pn6).
+arriva_acqua(pn6): ok_(pn5), arriva_acqua(pn5).
+arriva_acqua(pn5): ok_(pn4), arriva_acqua(pn4).
+arriva_acqua(pn4): ok_(pn3), arriva_acqua(pn3).
+arriva_acqua(pn3): ok_(pn2), arriva_acqua(pn2).
+arriva_acqua(pn2): ok_(pn1), arriva_acqua(pn1).
+arriva_acqua(pn1): ok_(rub).
+
 
 ass:
 ok(cb1).
@@ -87,14 +83,14 @@ ok(cb3).
 ok(s1).
 ok(s2).
 ok(s3).
-ok(s4).
-ok(s5).
-ok(s6).
-ok(s7).
 ok(l1).
 ok(l2).
-ok(l3).
-ok(l4).
-ok(l5).
-ok(l6).
-ok(l7).
+ok_(pn1).
+ok_(pn2).
+ok_(pn3).
+ok_(pn4).
+ok_(pn5).
+ok_(pn6).
+ok_(pn7).
+ok_(pn8).
+ok_(rub).

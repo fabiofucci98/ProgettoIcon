@@ -1,5 +1,0 @@
-conflict(a).
-conflict(b).
-conflict(X).
-conflict(R1,R2,b).
-conflict(R1,R2,b),color(R1,C,b).

@@ -13,7 +13,7 @@ en.load_kb('occur_check')
 q = e.parse('lt(Y,Y).')
 ans = en.prove(q)
 print(ans)
-
+input()
 ans = en.prove(q,occurs_check=False)
-
+input()
 print(ans)

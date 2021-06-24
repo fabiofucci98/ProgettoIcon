@@ -55,7 +55,6 @@ class QueryBox(arcade.gui.UIInputBox):
             font_size=15
 
         )
-        self.stored_text = ''
 
     def on_click(self):
         self.text = ''

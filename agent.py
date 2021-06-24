@@ -1,5 +1,6 @@
+from copy import deepcopy
 from path_finding import Graph, A_star, euclidean_distance
-from engine import Clause, Engine, ParseException, parse
+from engine import Clause, Constant, Engine, ParseException, parse
 from math import inf
 
 ELEVATOR_POS = 320, 48
@@ -16,7 +17,7 @@ class Agent:
         self.path = None
         self.floor_to_go = None
         self.options = {'abduce': False, 'one': False,
-                        'occurs': True, 'solve': False, 'solving': None}
+                        'occurs': False, 'solve': False, 'solving': None}
         self.route = None
         self.timer = 0
         self.solve_timer = 0
@@ -223,7 +224,11 @@ def clean(SLD_derivations, abduce=False):
         tmp_answers = [ans[-1].body for ans in SLD_derivations]
         if len(tmp_answers) == 0:
             return ['False']
-        return tmp_answers
+        answers = []
+        for ans in tmp_answers:
+            if ans not in answers:
+                answers.append(ans)
+        return answers
     tmp_answers = [der[-1].head.args for der in SLD_derivations]
     answers = []
     for answer in tmp_answers:

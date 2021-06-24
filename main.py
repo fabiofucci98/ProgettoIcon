@@ -33,7 +33,8 @@ class MyGame(arcade.View):
                            self.robot_sprite, self.floor)
 
         self.observations = ['dark(l1)',
-                             'dark(l2)']
+                             'dark(l2)',
+                             ]+['secca(pl'+str(n)+')' for n in range(1, 9)]
         self.assumables = [str(ass) for ass in self.robot.engine.ass]
         self.ass_colors = [True for i in range(len(self.assumables))]
         self.obs_colors = [False for i in range(len(self.observations))]
