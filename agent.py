@@ -2,7 +2,7 @@ from copy import deepcopy
 from path_finding import Graph, A_star, euclidean_distance
 from engine import Clause, Constant, Engine, ParseException, parse
 from math import inf
-
+from built_in import built_in_preds, built_in_funcs
 ELEVATOR_POS = 320, 48
 STAIRS_POS = 720, 496
 
@@ -10,14 +10,14 @@ STAIRS_POS = 720, 496
 class Agent:
     def __init__(self, wall_lists, kb_filename, sprite, floor):
         self.graphs = [Graph(wall_list) for wall_list in wall_lists]
-        self.engine = Engine()
+        self.engine = Engine(built_in_funcs, built_in_preds)
         self.engine.load_kb(kb_filename)
         self.floor = floor
         self.sprite = sprite
         self.path = None
         self.floor_to_go = None
         self.options = {'abduce': False, 'one': False,
-                        'occurs': False, 'solve': False, 'solving': None}
+                        'occurs': True, 'solve': False, 'solving': None}
         self.route = None
         self.timer = 0
         self.solve_timer = 0
@@ -36,8 +36,8 @@ class Agent:
             self.options['occurs'] = not self.options['occurs']
             self.message.extend(
                 ['occurs check = '+str(self.options['abduce'])])
-        elif text == 'solve_conflicts':
-            self.solve_conflicts()
+        elif text == 'check_conflicts':
+            self.check_conflicts()
         elif text.split()[0] == 'how' and len(text.split()) == 2:
             rules = self.engine.how(
                 parse(text.split()[1]+'.')[0], self.options['occurs'])
@@ -66,9 +66,17 @@ class Agent:
             else:
                 ans = clean(self.engine.prove(query, self.options['one'],
                                               self.options['abduce'], self.options['occurs']), self.options['abduce'])
-                self.message.extend([str(elem) for elem in ans])
+                for a in ans:
+                    a = str(a)
+                    if len(a) < 50:
+                        self.message.append(a)
+                    else:
+                        while len(a) > 50:
+                            self.message.append(a[0:50])
+                            a = a[50:]
+                        self.message.append(a)
 
-    def solve_conflicts(self):
+    def check_conflicts(self):
         def get_ind(conflict):
             inds = []
             for atom in conflict:
@@ -129,13 +137,22 @@ class Agent:
         ans = clean(self.engine.prove(
             parse('false.'), abduce=True), abduce=True)
         if len(ans) == 1 and ans[0] == 'False':
-            self.message.extend(['Non ci sono conflitti da risolvere'])
+            self.message.extend(['Non ci sono conflitti da controllare'])
             return
         conflict = min_conflict(ans)
 
         self.message.extend(
-            ['Ho trovato i seguenti conflitti']+[str(elem) for elem in ans]+[''])
-        self.message.extend(['Risolverò']+[str(conflict)]+[''])
+            ['Ho trovato i seguenti conflitti'])
+        for a in ans:
+            a = str(a)
+            if len(a) < 50:
+                self.message.append(a)
+            else:
+                while len(a) > 50:
+                    self.message.append(a[0:50])
+                    a = a[50:]
+                self.message.append(a)
+        self.message.extend(['Controllerò']+[str(conflict)]+[''])
         inds = get_ind(conflict)
         inds_pos = [self.get_pos(ind) for ind in inds]
         self.pos_ind_dict = dict(zip(inds_pos, inds))
@@ -166,7 +183,7 @@ class Agent:
         if not self.path and self.options['solving']:
             if self.solve_timer >= 1:
                 self.message.extend(
-                    ['Ho risolto '+self.options['solving']])
+                    ['Ho controllato '+self.options['solving']])
                 del self.engine.kb[self.engine.kb.index(
                     Clause(self.conflict[0]))]
                 del self.engine.ass[self.engine.ass.index(self.conflict[0])]
@@ -194,7 +211,7 @@ class Agent:
                 self.path = self.get_path(goal)
                 ind = str(self.pos_ind_dict[goal])
                 self.message.extend(
-                    ['Sto risolvendo '+ind])
+                    ['Sto controllando '+ind])
                 self.options['solving'] = ind
                 self.pos_ind_dict.pop(goal)
             else:

@@ -1,5 +1,8 @@
 # Predicati
 
+from engine import Constant
+
+
 def less(a, b):
     return eval(a.const+'<'+b.const)
 
@@ -21,27 +24,27 @@ def equals(a, b):
 
 
 def succ(n):
-    return eval(n.const+'+1')
+    return Constant(str(eval(n.const+'+1')))
 
 
 def prec(n):
-    return eval(n.const+'-1')
+    return Constant(str(eval(n.const+'-1')))
 
 
 def sum(a, b):
-    return eval(a.const+'+'+b.const)
+    return Constant(str(eval(a.const+'+'+b.const)))
 
 
 def mul(a, b):
-    return eval(a.const+'*'+b.const)
+    return Constant(str(eval(a.const+'*'+b.const)))
 
 
 def div(a, b):
-    return eval(a.const+'//'+b.const)
+    return Constant(str(eval(a.const+'//'+b.const)))
 
 
 def sub(a, b):
-    return eval(a.const+'-'+b.const)
+    return Constant(str(eval(a.const+'-'+b.const)))
 
 
 built_in_funcs = {'succ': succ, 'prec': prec, 'sum': sum,

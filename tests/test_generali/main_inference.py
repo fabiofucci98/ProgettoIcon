@@ -29,69 +29,75 @@ def clean(SLD_derivations):
 
     return answers
 
+
+# Esempio con naf su individui
+query = 'not_pp(d).'
+print('query: ' + query)
 query = 'not_pp(d).'
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
+print()
 # Primo esempio con un albero di derivazione più profondo
 query = 'a,d.'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
 print(engine.how(query[1]))
+print()
 # Esempio con individui e regole
 query = 'rotto(X).'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
+print()
 
 # Semplice derivazione con individui
 query = 'imm_west(X,Y).'
 
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
+print()
 
 # Derivazioni con naf
 query = 'a1.'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
+print()
 
 
 query = 'not_a1.'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
 
+print()
 # Derivazione con naf e predicati
 query = 'p(X).'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
 
+print()
 # Cicli
 query = 'a2.'
+print('query: ' + query)
 query = e.parse(query)
 print(clean(engine.prove(query))
       )
 print(engine.how(query[0]))
-
-query = e.parse(input())
-while(True):
-    print(engine)
-    if query:
-        print(clean(engine.prove(query))
-              )
-        print(engine.how(query))
-
-    else:
-        print('syntax error')
-    query = e.parse(input())

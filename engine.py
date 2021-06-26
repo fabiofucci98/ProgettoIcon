@@ -1,6 +1,5 @@
 import string
 from copy import deepcopy
-from built_in import built_in_preds, built_in_funcs
 
 
 class Clause:
@@ -133,7 +132,7 @@ class Constant:
 
 class Engine(object):
 
-    def __init__(self) -> None:
+    def __init__(self, built_in_funcs={}, built_in_preds={}) -> None:
         self.kb = []
         self.ass = []
         self.empty_body_clauses = []
@@ -183,13 +182,13 @@ class Engine(object):
         def derive(gac, abduce, occurs_check):
             def solve_f(gac):
                 def rec_solve(const):
-                    if const.const in built_in_funcs:
-                        args = [rec_solve(arg) for arg in const.args]
-                        for i in range(len(args)):
-                            if not isinstance(args[i], Constant):
-                                args[i] = Constant(str(args[i]))
-                        const.args = args
-                        return Constant(str(built_in_funcs[const.const](*const.args)))
+
+                    args = []
+                    for arg in const.args:
+                        args.append(rec_solve(arg))
+                    const.args = args
+                    if const.const in self.built_in_funcs:
+                        return self.built_in_funcs[const.const](*const.args)
                     else:
                         return const
 
@@ -215,9 +214,9 @@ class Engine(object):
                     continue
                 idx = gac.body.index(atom)
                 if not atom.negated:
-                    if atom.pred in built_in_preds:
+                    if atom.pred in self.built_in_preds:
                         try:
-                            f = built_in_preds[atom.pred]
+                            f = self.built_in_preds[atom.pred]
                             if f(*atom.args):
                                 tmp_gac = deepcopy(gac)
                                 del tmp_gac.body[idx]
@@ -276,14 +275,24 @@ class Engine(object):
                 if atom.contains_vars():
                     continue
                 idx = tmp_gac.body.index(atom)
-                for clause in self.empty_body_clauses:
-                    renamed_clause = self.__rename_vars(
-                        deepcopy(clause))
-                    sub = self.__unify(
-                        renamed_clause.head, atom, occurs_check)
-                    if isinstance(sub, list):
-                        del tmp_gac.body[idx]
-                        break
+                if atom.pred in self.built_in_preds:
+                    try:
+                        f = self.built_in_preds[atom.pred]
+                        if f(*atom.args):
+                            del tmp_gac.body[idx]
+                    except Exception:
+                        pass
+                else:
+                    for clause in self.empty_body_clauses:
+                        renamed_clause = self.__rename_vars(
+                            deepcopy(clause))
+                        sub = self.__unify(
+                            renamed_clause.head, atom, occurs_check)
+                        if isinstance(sub, list):
+                            del tmp_gac.body[idx]
+                            tmp_gac.body[idx:idx] = renamed_clause.body
+                            tmp_gac = self.__substitute(tmp_gac, sub)
+                            break
             return tmp_gac
 
         SLD_derivations = []
@@ -362,13 +371,14 @@ class Engine(object):
         def replace(a, b, eqs, subs):
             def rec_replace(a, b, term):
                 if term == a:
-                    term = b
-                if isinstance(term, Variable):
+                    return b
+                elif isinstance(term, Variable):
+                    return term
+                else:
+                    term.args = [rec_replace(
+                        a, b, arg) for arg in term.args]
                     return term
 
-                term.args = [rec_replace(
-                    a, b, arg) for arg in term.args]
-                return term
             for i in range(len(eqs)):
                 for j in range(len(eqs[i])):
                     eqs[i][j] = rec_replace(a, b, eqs[i][j])
@@ -396,7 +406,18 @@ class Engine(object):
                     subs.append(([b, a]))
                 elif isinstance(a, Predicate) and isinstance(b, Predicate) and len(a.args) == len(b.args) and a.pred == b.pred and len(a.args) > 0:
                     for ai, bi in zip(a.args, b.args):
-                        eqs.append([ai, bi])
+                        if isinstance(ai, Variable) and isinstance(bi, Variable):
+                            eqs.insert(0, [ai, bi])
+
+                        else:
+                            eqs.append([ai, bi])
+                elif isinstance(a, Constant) and isinstance(b, Constant) and len(a.args) == len(b.args) and a.const == b.const and len(a.args) > 0:
+                    for ai, bi in zip(a.args, b.args):
+                        if isinstance(ai, Variable) and isinstance(bi, Variable):
+                            eqs.insert(0, [ai, bi])
+
+                        else:
+                            eqs.append([ai, bi])
                 else:
                     return None
         return subs

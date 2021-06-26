@@ -11,7 +11,7 @@ def fact(n):
     prod = 1
     for i in range(1, int(n.const)+1):
         prod *= i
-    return prod
+    return e.Constant(str(prod))
 
 
 def is_two_n_plus_one(n1, n2):

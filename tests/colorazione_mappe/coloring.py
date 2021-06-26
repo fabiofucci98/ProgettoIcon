@@ -17,10 +17,10 @@ for line in f:
         line = line[0:-1]
     queries.append(e.parse(line))
 for query in queries:
-    ans = en.prove(query)
+    ans = en.prove(query,prove_one=True)
     print('query: '+str(query))
     if len(ans) == 0:
         print(None)
     for a in ans:
-        print(a[-1])
+        print(a)
     print()

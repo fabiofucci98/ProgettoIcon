@@ -21,14 +21,14 @@ posizione(s3,384,624,1).
 
 
 posizione(rub,16,640,2).
-posizione(pn1,32,640,2).
-posizione(pn2,112,640,2).
-posizione(pn3,208,640,2).
-posizione(pn4,288,640,2).
-posizione(pn5,384,640,2).
-posizione(pn6,480,640,2).
-posizione(pn7,560,640,2).
-posizione(pn8,656,640,2).
+posizione(pn(1),32,640,2).
+posizione(pn(2),112,640,2).
+posizione(pn(3),208,640,2).
+posizione(pn(4),288,640,2).
+posizione(pn(5),384,640,2).
+posizione(pn(6),480,640,2).
+posizione(pn(7),560,640,2).
+posizione(pn(8),656,640,2).
 
 up(s1).
 up(s2).
@@ -54,27 +54,11 @@ lit(l1) : light(l1), live(l1), ok(l1).
 lit(l2) : light(l2), live(l2), ok(l2).
 
 false : dark(X), lit(X).
-false : arriva_acqua(X), secca(X).
+false : watered_plant(X), dry(X).
 
-arriva_acqua(pl8): ok_(pn8), arriva_acqua(pn8).
-arriva_acqua(pl7): ok_(pn7), arriva_acqua(pn7).
-arriva_acqua(pl6): ok_(pn6), arriva_acqua(pn6).
-arriva_acqua(pl5): ok_(pn5), arriva_acqua(pn5).
-arriva_acqua(pl4): ok_(pn4), arriva_acqua(pn4).
-arriva_acqua(pl3): ok_(pn3), arriva_acqua(pn3).
-arriva_acqua(pl2): ok_(pn2), arriva_acqua(pn2).
-arriva_acqua(pl1): ok_(pn1), arriva_acqua(pn1).
-
-
-arriva_acqua(pn8): ok_(pn7), arriva_acqua(pn7).
-arriva_acqua(pn7): ok_(pn6), arriva_acqua(pn6).
-arriva_acqua(pn6): ok_(pn5), arriva_acqua(pn5).
-arriva_acqua(pn5): ok_(pn4), arriva_acqua(pn4).
-arriva_acqua(pn4): ok_(pn3), arriva_acqua(pn3).
-arriva_acqua(pn3): ok_(pn2), arriva_acqua(pn2).
-arriva_acqua(pn2): ok_(pn1), arriva_acqua(pn1).
-arriva_acqua(pn1): ok_(rub).
-
+watered_plant(pl(X)): ok_(pn(X)), watered_joint(pn(prec(X))), greater(X,0).
+watered_joint(pn(X)): ok_(pn(X)), watered_joint(pn(prec(X))), greater(X,1).
+watered_joint(pn(1)): ok_(pn(1)),ok_(rub).
 
 ass:
 ok(cb1).
@@ -85,12 +69,12 @@ ok(s2).
 ok(s3).
 ok(l1).
 ok(l2).
-ok_(pn1).
-ok_(pn2).
-ok_(pn3).
-ok_(pn4).
-ok_(pn5).
-ok_(pn6).
-ok_(pn7).
-ok_(pn8).
+ok_(pn(1)).
+ok_(pn(2)).
+ok_(pn(3)).
+ok_(pn(4)).
+ok_(pn(5)).
+ok_(pn(6)).
+ok_(pn(7)).
+ok_(pn(8)).
 ok_(rub).
