@@ -50,15 +50,18 @@ live(w3) : live(w5), ok(cb1).
 live(p2) : live(w6).
 live(w6) : live(w5), ok(cb2).
 live(w5) : live(outside).
-lit(l1) : light(l1), live(l1), ok(l1).
-lit(l2) : light(l2), live(l2), ok(l2).
+lit(X) : light(X), live(X), ok(X).
+
+watered_plant(pl(X)): ok_(pn(X)), watered_node(pn(prec(X))), greater(X,0).
+watered_node(pn(X)): ok_(pn(X)), watered_node(pn(prec(X))), greater(X,1).
+watered_node(pn(1)): ok_(pn(1)),ok_(rub).
+
+boss_at_home : keys_hanged, not_boss_said_goodbye.
+thieves_in : door_is_open, not_boss_at_home.
+
 
 false : dark(X), lit(X).
 false : watered_plant(X), dry(X).
-
-watered_plant(pl(X)): ok_(pn(X)), watered_joint(pn(prec(X))), greater(X,0).
-watered_joint(pn(X)): ok_(pn(X)), watered_joint(pn(prec(X))), greater(X,1).
-watered_joint(pn(1)): ok_(pn(1)),ok_(rub).
 
 ass:
 ok(cb1).

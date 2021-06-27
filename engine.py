@@ -451,7 +451,7 @@ class Engine(object):
 
     def how(self, atom: Predicate, occurs_check=True):
         if atom.negated:
-            return 'naf'
+            return [['naf']]
         rules = []
         SLD_ders = self.prove([atom], occurs_check=occurs_check)
         for der in SLD_ders:
