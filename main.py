@@ -34,7 +34,9 @@ class MyGame(arcade.View):
 
         self.observations = ['dark(l1)',
                              'dark(l2)',
-                             'door_is_open'
+                             'door_is_open',
+                             'keys_hanged',
+                             'boss_said_goodbye'
                              ]+['dry(pl('+str(n)+'))' for n in range(1, 9)]
         self.assumables = [str(ass) for ass in self.robot.engine.ass]
         self.ass_colors = [True for i in range(len(self.assumables))]
