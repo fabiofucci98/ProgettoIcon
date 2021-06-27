@@ -1,0 +1,23 @@
+muovi(posizione).
+	permette di far muovere l'agente in una posizione contenuta in kb
+	Per esempio: muovi(cucina). farà riferimento alla posizione ed al piano della stanza "cucina" presente nell kb.
+
+check_conflicts
+	permette di controllare i conflitti.
+	Per esempio cliccando l'osservazione "dark(l1)" l'agente controllerà i conflitti legati a questa osservazione
+how atom
+	restituisce l'insieme di regole utilizzate per provare l'atomo. Se non c'è un modo per provare l'atomo, restituirà "None"
+	Per esempio cliccando l'osservazione "keys_hanged", il comando "how boss_at_home" restituirà la regola "boss_at_home : keys_hanged, not_boss_said_goodbye."
+	
+abduce
+	specifica se effettuare diagnosi abduttiva
+	
+prove one
+	specifica se fermarsi dopo aver trovato una singola sequenza di clausole di risposta per dimostrare l'obiettivo
+
+occurs check
+	specifica se effettuare il controllo di occorrenza durante l'unificazione di due espressioni, se effettuato potrebbe rendere la dimostrazione meno efficente ma se non effettuato rende la procedura di dimostrazione unsound
+
+false.
+	se non si sta effettuando diagnosi abduttiva, allora restituirà l'esito della dimostrazione della query "false."; altrimenti restituirà i sottoinsemi degli assumibili conflitti minimali per la query
+	Per esempio cliccando l'osservazione "dark(l1)" e ponendo la query "false.", restituirà "True"
