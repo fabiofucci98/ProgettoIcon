@@ -25,8 +25,9 @@ class OkButton(arcade.gui.UIFlatButton):
         self.pres = False
 
     def on_click(self):
-        self.cron.append('>>'+self.input_box.text)
-        self.pres = True
+        if self.input_box.text.strip() != '':
+            self.cron.append('>>'+self.input_box.text)
+            self.pres = True
 
     def get_text(self):
         return self.input_box.text

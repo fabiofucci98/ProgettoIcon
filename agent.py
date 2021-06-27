@@ -1,7 +1,8 @@
 from copy import deepcopy
+from typing import cast
 from path_finding import Graph, A_star, euclidean_distance
 from engine import Clause, Constant, Engine, ParseException, parse
-from math import inf
+from math import exp, inf
 from built_in import built_in_preds, built_in_funcs
 ELEVATOR_POS = 320, 48
 STAIRS_POS = 720, 496
@@ -175,8 +176,11 @@ class Agent:
         out = clean(self.engine.prove(tmp_query))
         if out == ['False']:
             return
-        x, y, floor = int(out[0][0].const), int(
-            out[0][1].const), int(out[0][2].const)
+        try:
+            x, y, floor = int(out[0][0].const), int(
+                out[0][1].const), int(out[0][2].const)
+        except ValueError:
+            return None
         return x, y, floor
 
     def update_path(self, delta_time, ass_lbls, ass_colors):
